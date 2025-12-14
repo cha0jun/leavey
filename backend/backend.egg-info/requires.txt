@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+sqlmodel
+alembic
+psycopg2-binary
+psycopg2-binary
+asyncpg
+pyjwt
+httpx
+cryptography
+python-dotenv

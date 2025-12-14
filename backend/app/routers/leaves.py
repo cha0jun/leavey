@@ -1,0 +1,255 @@
+from typing import List, Optional
+from datetime import datetime, timezone
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlmodel import Session, select
+from sqlalchemy.orm import selectinload
+
+from app.core.database import get_session
+from app.core.security import get_current_user
+from app.models import LeaveRequest, LeaveCategory, User, UserRole, LeaveStatus, SyncStatus
+from app.routers.audit import create_audit_log
+
+# --- DTOs ---
+from sqlmodel import SQLModel, Field
+
+class LeaveRequestCreate(SQLModel):
+    """Safe Input: No status, no flags, just request data."""
+    category_id: int
+    start_date: datetime
+    end_date: datetime
+    total_days: float
+    reason: str
+    attachment_url: Optional[str] = None
+
+class LeaveRequestUpdate(SQLModel):
+    """Fields a user can change while it's still PENDING."""
+    start_date: Optional[datetime] = None
+    end_date: Optional[datetime] = None
+    total_days: Optional[float] = None
+    reason: Optional[str] = None
+    attachment_url: Optional[str] = None
+
+class LeaveRequestRead(SQLModel):
+    """Output: Includes nested Category and User details for the UI."""
+    id: int
+    user_id: int
+    category_id: int
+    start_date: datetime
+    end_date: datetime
+    total_days: float
+    status: LeaveStatus
+    cached_chargeable_status: bool
+    reason: Optional[str] = None
+    attachment_url: Optional[str] = None
+    created_at: datetime
+    approved_at: Optional[datetime] = None
+    
+    category: Optional[LeaveCategory] = None
+    user: Optional[User] = None
+
+router = APIRouter()
+
+# --- HELPER: Mock External Vendor API (SYNC-002) ---
+def sync_to_vendor_system(leave: LeaveRequest, user: User) -> str:
+    """
+    Simulates sending data to the Vendor's HR API.
+    In production, this would be `requests.post(VENDOR_URL, json=...)`
+    """
+    import uuid
+    # Simulate Success
+    print(f" >>> [SYNC] Pushing Leave {leave.id} for User {user.email} to Vendor API...")
+    return f"VENDOR-{uuid.uuid4().hex[:8].upper()}"
+
+
+# --- ENDPOINTS ---
+
+# 1. CREATE (LEAVE-001)
+@router.post("/", response_model=LeaveRequestRead)
+async def create_leave_request(
+    leave_data: LeaveRequestCreate,
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session)
+):
+    # A. Validate Category
+    category = session.get(LeaveCategory, leave_data.category_id)
+    if not category:
+        raise HTTPException(status_code=404, detail="Category not found")
+
+    # B. Map to DB Model
+    # We explicitly set defaults here to ensure safety
+    db_leave = LeaveRequest.model_validate(leave_data)
+    db_leave.user_id = current_user.id
+    db_leave.status = LeaveStatus.PENDING
+    
+    # C. FINANCIAL SNAPSHOT (Crucial for FIN-003)
+    # We lock in the billable status NOW. If Admin changes the category later,
+    # this specific leave request remains unchanged for billing.
+    db_leave.cached_chargeable_status = category.is_chargeable
+    db_leave.external_sync_status = SyncStatus.NOT_SYNCED
+
+    session.add(db_leave)
+    
+    # D. Audit Log happens *before* commit (part of same transaction)
+    # We need to flush first to get an ID for the leave request
+    session.flush() 
+    
+    create_audit_log(
+        session=session,
+        leave_request_id=db_leave.id,
+        actor_user_id=current_user.id,
+        action="CREATE",
+        new_value="PENDING"
+    )
+
+    session.commit()
+    session.refresh(db_leave)
+    return db_leave
+
+
+# 2. LIST (Dashboard)
+@router.get("/", response_model=List[LeaveRequestRead])
+async def list_leaves(
+    offset: int = 0,
+    limit: int = Query(default=50, le=100),
+    status: Optional[LeaveStatus] = None,
+    user_id: Optional[int] = None, # Admin filter
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session)
+):
+    # Use selectinload to eagerly fetch relationships (Performance)
+    statement = select(LeaveRequest).options(
+        selectinload(LeaveRequest.category),
+        selectinload(LeaveRequest.user)
+    ).offset(offset).limit(limit).order_by(LeaveRequest.created_at.desc())
+
+    # Role-Based Filtering
+    if current_user.role == UserRole.CONTRACTOR:
+        # Contractors ONLY see their own
+        statement = statement.where(LeaveRequest.user_id == current_user.id)
+    elif user_id:
+        # Managers/Admins can filter by specific user
+        statement = statement.where(LeaveRequest.user_id == user_id)
+    
+    if status:
+        statement = statement.where(LeaveRequest.status == status)
+
+    return session.exec(statement).all()
+
+
+# 3. GET SINGLE
+@router.get("/{leave_id}", response_model=LeaveRequestRead)
+async def get_leave_detail(
+    leave_id: int,
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session)
+):
+    leave = session.get(LeaveRequest, leave_id)
+    if not leave:
+        raise HTTPException(status_code=404, detail="Not found")
+
+    # Security Check
+    is_owner = leave.user_id == current_user.id
+    is_manager = current_user.role in [UserRole.MANAGER, UserRole.ADMIN]
+    
+    if not (is_owner or is_manager):
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    return leave
+
+
+# 4. UPDATE (User editing their own pending request)
+@router.patch("/{leave_id}", response_model=LeaveRequestRead)
+async def update_leave_request(
+    leave_id: int,
+    update_data: LeaveRequestUpdate,
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session)
+):
+    leave = session.get(LeaveRequest, leave_id)
+    if not leave:
+        raise HTTPException(status_code=404, detail="Not found")
+
+    if leave.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    if leave.status != LeaveStatus.PENDING:
+        raise HTTPException(status_code=400, detail="Cannot edit a processed request")
+
+    # Apply updates
+    data = update_data.model_dump(exclude_unset=True)
+    for key, value in data.items():
+        # Audit specific field changes if needed (Optional: verbose logging)
+        # For now, we just log the generic update action
+        setattr(leave, key, value)
+
+    create_audit_log(
+        session=session,
+        leave_request_id=leave.id,
+        actor_user_id=current_user.id,
+        action="UPDATE",
+        field_changed="details"
+    )
+
+    session.add(leave)
+    session.commit()
+    session.refresh(leave)
+    return leave
+
+
+# 5. APPROVE / REJECT (SYNC-002)
+# We use a specific endpoint for workflow actions, not a generic PATCH
+@router.post("/{leave_id}/process", response_model=LeaveRequestRead)
+async def process_leave_status(
+    leave_id: int,
+    status: LeaveStatus, # Must be APPROVED or REJECTED
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session)
+):
+    """
+    Managers use this to Approve/Reject.
+    Triggers external sync if Approved.
+    """
+    # Security: Only Managers/Admins
+    if current_user.role not in [UserRole.MANAGER, UserRole.ADMIN]:
+        raise HTTPException(status_code=403, detail="Only Managers can process leaves")
+
+    if status == LeaveStatus.PENDING:
+        raise HTTPException(status_code=400, detail="Use generic update for Pending")
+
+    leave = session.get(LeaveRequest, leave_id)
+    if not leave:
+        raise HTTPException(status_code=404, detail="Not found")
+    
+    old_status = leave.status
+    
+    # Update Status
+    leave.status = status
+    leave.approved_at = datetime.now(timezone.utc) if status == LeaveStatus.APPROVED else None
+
+    # --- SYNC-002 LOGIC ---
+    if status == LeaveStatus.APPROVED:
+        try:
+            # Call the "External" API
+            external_id = sync_to_vendor_system(leave, leave.user)
+            leave.external_sync_status = SyncStatus.SYNCED
+            leave.external_reference_id = external_id
+        except Exception as e:
+            # Fallback: Don't crash the approval, just flag it as ERROR
+            print(f"Sync Failed: {e}")
+            leave.external_sync_status = SyncStatus.ERROR
+
+    # --- AUDIT LOG ---
+    create_audit_log(
+        session=session,
+        leave_request_id=leave.id,
+        actor_user_id=current_user.id,
+        action="UPDATE",
+        field_changed="status",
+        old_value=old_status,
+        new_value=status
+    )
+
+    session.add(leave)
+    session.commit()
+    session.refresh(leave)
+    return leave
