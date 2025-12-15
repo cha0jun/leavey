@@ -18,6 +18,7 @@ class LeaveStatus(str, Enum):
     PENDING = "PENDING"
     APPROVED = "APPROVED"
     REJECTED = "REJECTED"
+    CANCELLED = "CANCELLED"
 
 class SyncStatus(str, Enum):
     NOT_SYNCED = "NOT_SYNCED"

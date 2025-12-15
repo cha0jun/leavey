@@ -4,15 +4,19 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { fetchClient } from "@/lib/api/client";
+import { CalendarClock, CheckCircle2, Wallet, Plus, ArrowRight } from "lucide-react";
+import { StatsCard } from "@/components/dashboard/StatsCard";
+import { ActivityItem } from "@/components/dashboard/ActivityItem";
+import { Button } from "@/components/ui/button";
 
-// Types (Manually defined since no Orval generation)
+// Types
 interface LeaveRequest {
     id: number;
     category_id: number;
     start_date: string;
     end_date: string;
     total_days: number;
-    status: "PENDING" | "APPROVED" | "REJECTED"; // Uppercase now
+    status: "PENDING" | "APPROVED" | "REJECTED";
     cached_chargeable_status: boolean;
 }
 
@@ -27,9 +31,11 @@ export default function Dashboard() {
 
             try {
                 const token = await getToken();
-                if (!token) return; // Should handle this better
+                if (!token) return;
 
                 const data = await fetchClient("/leaves/", {}, token);
+                // Sort by ID desc (newest first)
+                data.sort((a: LeaveRequest, b: LeaveRequest) => b.id - a.id);
                 setLeaves(data);
             } catch (err) {
                 console.error(err);
@@ -41,76 +47,74 @@ export default function Dashboard() {
         loadLeaves();
     }, [isLoaded, isSignedIn, getToken]);
 
+    // Stats
+    const pendingCount = leaves.filter(l => l.status === "PENDING").length;
+    const approvedCount = leaves.filter(l => l.status === "APPROVED").length;
+    // const remainingBalance = 18; // Hardcoded for now as API doesn't support it
+
+    const recentActivity = leaves.slice(0, 5); // Show top 5
+
     return (
-        <div className="container mx-auto py-10">
-            <div className="flex justify-between items-center mb-6">
-                <h1 className="text-3xl font-bold">Leave Dashboard</h1>
-                <Link
-                    href="/leaves/new"
-                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                >
-                    New Application
-                </Link>
+        <div className="container mx-auto py-10 space-y-8">
+            <h1 className="text-3xl font-bold">Dashboard</h1>
+
+            {/* Stats Section */}
+            <div className="grid gap-4 md:grid-cols-3">
+                <StatsCard
+                    title="Pending Requests"
+                    value={pendingCount}
+                    icon={CalendarClock}
+                    description="Awaiting approval"
+                />
+                <StatsCard
+                    title="Approved Requests"
+                    value={approvedCount}
+                    icon={CheckCircle2}
+                    description="Total approved leaves"
+                />
+                <StatsCard
+                    title="Remaining Balance"
+                    value="18 Days"
+                    icon={Wallet}
+                    description="Annual leave balance"
+                />
             </div>
 
-            <div className="bg-white shadow-md rounded-lg overflow-hidden border border-gray-200">
-                <table className="min-w-full leading-normal">
-                    <thead>
-                        <tr>
-                            <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                Dates
-                            </th>
-                            <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                Type (ID)
-                            </th>
-                            <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                Days
-                            </th>
-                            <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                Chargeable
-                            </th>
-                            <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                Status
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {loading ? (
-                            <tr><td colSpan={5} className="text-center py-4">Loading...</td></tr>
-                        ) : leaves.length === 0 ? (
-                            <tr><td colSpan={5} className="text-center py-4 text-gray-500">No leave requests found.</td></tr>
-                        ) : (
-                            leaves.map((leave) => (
-                                <tr key={leave.id}>
-                                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                        {leave.start_date} to {leave.end_date}
-                                    </td>
-                                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                        {leave.category_id}
-                                    </td>
-                                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                        {leave.total_days}
-                                    </td>
-                                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                        {leave.cached_chargeable_status ?
-                                            <span className="text-red-500 font-semibold">Yes (Billable)</span> :
-                                            <span className="text-green-600">No (Non-Chargeable)</span>
-                                        }
-                                    </td>
-                                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                      ${leave.status === 'APPROVED' ? 'bg-green-100 text-green-800' :
-                                                leave.status === 'REJECTED' ? 'bg-red-100 text-red-800' :
-                                                    'bg-yellow-100 text-yellow-800'}`}>
-                                            {leave.status}
-                                        </span>
-                                    </td>
-                                </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
+            {/* Recent Activity Section */}
+            <div className="rounded-xl border bg-card text-card-foreground shadow">
+                <div className="flex flex-col space-y-1.5 p-6 md:flex-row md:items-center md:justify-between border-b">
+                    <h3 className="font-semibold leading-none tracking-tight text-xl">Recent Activity</h3>
+                    <Link href="/leaves">
+                        <Button variant="outline" className="gap-2">
+                            View All
+                        </Button>
+                    </Link>
+                </div>
+                <div className="p-6 pt-6 space-y-4">
+                    {loading ? (
+                        <div className="text-center py-4 text-muted-foreground">Loading activity...</div>
+                    ) : recentActivity.length === 0 ? (
+                        <div className="text-center py-4 text-muted-foreground">No recent activity.</div>
+                    ) : (
+                        recentActivity.map((leave) => (
+                            <ActivityItem
+                                key={leave.id}
+                                date={`${leave.start_date} - ${leave.end_date}`}
+                                description={`Leave Request #${leave.id} (${leave.total_days} days)`}
+                                status={leave.status}
+                            />
+                        ))
+                    )}
+                </div>
+                <div className="flex items-center p-6 pt-0 border-t bg-muted/50">
+                    <div className="w-full flex justify-end py-4">
+                        <Button variant="ghost" className="gap-2">
+                            View All <ArrowRight className="h-4 w-4" />
+                        </Button>
+                    </div>
+                </div>
             </div>
         </div>
     );
 }
+
