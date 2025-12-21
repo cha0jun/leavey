@@ -18,141 +18,143 @@ import type {
   UseQueryResult,
 } from "@tanstack/react-query";
 
-import axios from "axios";
-import type { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
-
 import type {
   AuditLogRead,
-  GetAllAuditLogsGetParams,
+  GetAllAuditLogsAuditGetParams,
   HTTPValidationError,
 } from "../index.schemas";
+
+import { customInstance } from ".././axios-instance";
+
+type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 /**
  * Global Audit Trail (AUDIT-004).
 Only Admins should see the full system history.
  * @summary Get All Audit Logs
  */
-export const getAllAuditLogsGet = (
-  params?: GetAllAuditLogsGetParams,
-  options?: AxiosRequestConfig,
-): Promise<AxiosResponse<AuditLogRead[]>> => {
-  return axios.get(`/`, {
-    ...options,
-    params: { ...params, ...options?.params },
-  });
-};
-
-export const getGetAllAuditLogsGetQueryKey = (
-  params?: GetAllAuditLogsGetParams,
+export const getAllAuditLogsAuditGet = (
+  params?: GetAllAuditLogsAuditGetParams,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
 ) => {
-  return [`/`, ...(params ? [params] : [])] as const;
+  return customInstance<AuditLogRead[]>(
+    { url: `/audit/`, method: "GET", params, signal },
+    options,
+  );
 };
 
-export const getGetAllAuditLogsGetQueryOptions = <
-  TData = Awaited<ReturnType<typeof getAllAuditLogsGet>>,
-  TError = AxiosError<HTTPValidationError>,
+export const getGetAllAuditLogsAuditGetQueryKey = (
+  params?: GetAllAuditLogsAuditGetParams,
+) => {
+  return [`/audit/`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetAllAuditLogsAuditGetQueryOptions = <
+  TData = Awaited<ReturnType<typeof getAllAuditLogsAuditGet>>,
+  TError = HTTPValidationError,
 >(
-  params?: GetAllAuditLogsGetParams,
+  params?: GetAllAuditLogsAuditGetParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getAllAuditLogsGet>>,
+        Awaited<ReturnType<typeof getAllAuditLogsAuditGet>>,
         TError,
         TData
       >
     >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
 ) => {
-  const { query: queryOptions, axios: axiosOptions } = options ?? {};
+  const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey =
-    queryOptions?.queryKey ?? getGetAllAuditLogsGetQueryKey(params);
+    queryOptions?.queryKey ?? getGetAllAuditLogsAuditGetQueryKey(params);
 
   const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof getAllAuditLogsGet>>
-  > = ({ signal }) => getAllAuditLogsGet(params, { signal, ...axiosOptions });
+    Awaited<ReturnType<typeof getAllAuditLogsAuditGet>>
+  > = ({ signal }) => getAllAuditLogsAuditGet(params, requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof getAllAuditLogsGet>>,
+    Awaited<ReturnType<typeof getAllAuditLogsAuditGet>>,
     TError,
     TData
   > & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
-export type GetAllAuditLogsGetQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getAllAuditLogsGet>>
+export type GetAllAuditLogsAuditGetQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getAllAuditLogsAuditGet>>
 >;
-export type GetAllAuditLogsGetQueryError = AxiosError<HTTPValidationError>;
+export type GetAllAuditLogsAuditGetQueryError = HTTPValidationError;
 
-export function useGetAllAuditLogsGet<
-  TData = Awaited<ReturnType<typeof getAllAuditLogsGet>>,
-  TError = AxiosError<HTTPValidationError>,
+export function useGetAllAuditLogsAuditGet<
+  TData = Awaited<ReturnType<typeof getAllAuditLogsAuditGet>>,
+  TError = HTTPValidationError,
 >(
-  params: undefined | GetAllAuditLogsGetParams,
+  params: undefined | GetAllAuditLogsAuditGetParams,
   options: {
     query: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getAllAuditLogsGet>>,
+        Awaited<ReturnType<typeof getAllAuditLogsAuditGet>>,
         TError,
         TData
       >
     > &
       Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getAllAuditLogsGet>>,
+          Awaited<ReturnType<typeof getAllAuditLogsAuditGet>>,
           TError,
-          Awaited<ReturnType<typeof getAllAuditLogsGet>>
+          Awaited<ReturnType<typeof getAllAuditLogsAuditGet>>
         >,
         "initialData"
       >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
-export function useGetAllAuditLogsGet<
-  TData = Awaited<ReturnType<typeof getAllAuditLogsGet>>,
-  TError = AxiosError<HTTPValidationError>,
+export function useGetAllAuditLogsAuditGet<
+  TData = Awaited<ReturnType<typeof getAllAuditLogsAuditGet>>,
+  TError = HTTPValidationError,
 >(
-  params?: GetAllAuditLogsGetParams,
+  params?: GetAllAuditLogsAuditGetParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getAllAuditLogsGet>>,
+        Awaited<ReturnType<typeof getAllAuditLogsAuditGet>>,
         TError,
         TData
       >
     > &
       Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getAllAuditLogsGet>>,
+          Awaited<ReturnType<typeof getAllAuditLogsAuditGet>>,
           TError,
-          Awaited<ReturnType<typeof getAllAuditLogsGet>>
+          Awaited<ReturnType<typeof getAllAuditLogsAuditGet>>
         >,
         "initialData"
       >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
-export function useGetAllAuditLogsGet<
-  TData = Awaited<ReturnType<typeof getAllAuditLogsGet>>,
-  TError = AxiosError<HTTPValidationError>,
+export function useGetAllAuditLogsAuditGet<
+  TData = Awaited<ReturnType<typeof getAllAuditLogsAuditGet>>,
+  TError = HTTPValidationError,
 >(
-  params?: GetAllAuditLogsGetParams,
+  params?: GetAllAuditLogsAuditGetParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getAllAuditLogsGet>>,
+        Awaited<ReturnType<typeof getAllAuditLogsAuditGet>>,
         TError,
         TData
       >
     >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -162,26 +164,26 @@ export function useGetAllAuditLogsGet<
  * @summary Get All Audit Logs
  */
 
-export function useGetAllAuditLogsGet<
-  TData = Awaited<ReturnType<typeof getAllAuditLogsGet>>,
-  TError = AxiosError<HTTPValidationError>,
+export function useGetAllAuditLogsAuditGet<
+  TData = Awaited<ReturnType<typeof getAllAuditLogsAuditGet>>,
+  TError = HTTPValidationError,
 >(
-  params?: GetAllAuditLogsGetParams,
+  params?: GetAllAuditLogsAuditGetParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getAllAuditLogsGet>>,
+        Awaited<ReturnType<typeof getAllAuditLogsAuditGet>>,
         TError,
         TData
       >
     >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
-  const queryOptions = getGetAllAuditLogsGetQueryOptions(params, options);
+  const queryOptions = getGetAllAuditLogsAuditGetQueryOptions(params, options);
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
     TData,
@@ -199,48 +201,55 @@ Contractors can see history of THEIR own requests.
 Managers/Admins can see history of requests they have access to.
  * @summary Get Leave History
  */
-export const getLeaveHistoryLeaveLeaveRequestIdGet = (
+export const getLeaveHistoryAuditLeaveLeaveRequestIdGet = (
   leaveRequestId: number,
-  options?: AxiosRequestConfig,
-): Promise<AxiosResponse<AuditLogRead[]>> => {
-  return axios.get(`/leave/${leaveRequestId}`, options);
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<AuditLogRead[]>(
+    { url: `/audit/leave/${leaveRequestId}`, method: "GET", signal },
+    options,
+  );
 };
 
-export const getGetLeaveHistoryLeaveLeaveRequestIdGetQueryKey = (
+export const getGetLeaveHistoryAuditLeaveLeaveRequestIdGetQueryKey = (
   leaveRequestId?: number,
 ) => {
-  return [`/leave/${leaveRequestId}`] as const;
+  return [`/audit/leave/${leaveRequestId}`] as const;
 };
 
-export const getGetLeaveHistoryLeaveLeaveRequestIdGetQueryOptions = <
-  TData = Awaited<ReturnType<typeof getLeaveHistoryLeaveLeaveRequestIdGet>>,
-  TError = AxiosError<HTTPValidationError>,
+export const getGetLeaveHistoryAuditLeaveLeaveRequestIdGetQueryOptions = <
+  TData = Awaited<
+    ReturnType<typeof getLeaveHistoryAuditLeaveLeaveRequestIdGet>
+  >,
+  TError = HTTPValidationError,
 >(
   leaveRequestId: number,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getLeaveHistoryLeaveLeaveRequestIdGet>>,
+        Awaited<ReturnType<typeof getLeaveHistoryAuditLeaveLeaveRequestIdGet>>,
         TError,
         TData
       >
     >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
 ) => {
-  const { query: queryOptions, axios: axiosOptions } = options ?? {};
+  const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey =
     queryOptions?.queryKey ??
-    getGetLeaveHistoryLeaveLeaveRequestIdGetQueryKey(leaveRequestId);
+    getGetLeaveHistoryAuditLeaveLeaveRequestIdGetQueryKey(leaveRequestId);
 
   const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof getLeaveHistoryLeaveLeaveRequestIdGet>>
+    Awaited<ReturnType<typeof getLeaveHistoryAuditLeaveLeaveRequestIdGet>>
   > = ({ signal }) =>
-    getLeaveHistoryLeaveLeaveRequestIdGet(leaveRequestId, {
+    getLeaveHistoryAuditLeaveLeaveRequestIdGet(
+      leaveRequestId,
+      requestOptions,
       signal,
-      ...axiosOptions,
-    });
+    );
 
   return {
     queryKey,
@@ -248,86 +257,96 @@ export const getGetLeaveHistoryLeaveLeaveRequestIdGetQueryOptions = <
     enabled: !!leaveRequestId,
     ...queryOptions,
   } as UseQueryOptions<
-    Awaited<ReturnType<typeof getLeaveHistoryLeaveLeaveRequestIdGet>>,
+    Awaited<ReturnType<typeof getLeaveHistoryAuditLeaveLeaveRequestIdGet>>,
     TError,
     TData
   > & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
-export type GetLeaveHistoryLeaveLeaveRequestIdGetQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getLeaveHistoryLeaveLeaveRequestIdGet>>
+export type GetLeaveHistoryAuditLeaveLeaveRequestIdGetQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getLeaveHistoryAuditLeaveLeaveRequestIdGet>>
 >;
-export type GetLeaveHistoryLeaveLeaveRequestIdGetQueryError =
-  AxiosError<HTTPValidationError>;
+export type GetLeaveHistoryAuditLeaveLeaveRequestIdGetQueryError =
+  HTTPValidationError;
 
-export function useGetLeaveHistoryLeaveLeaveRequestIdGet<
-  TData = Awaited<ReturnType<typeof getLeaveHistoryLeaveLeaveRequestIdGet>>,
-  TError = AxiosError<HTTPValidationError>,
+export function useGetLeaveHistoryAuditLeaveLeaveRequestIdGet<
+  TData = Awaited<
+    ReturnType<typeof getLeaveHistoryAuditLeaveLeaveRequestIdGet>
+  >,
+  TError = HTTPValidationError,
 >(
   leaveRequestId: number,
   options: {
     query: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getLeaveHistoryLeaveLeaveRequestIdGet>>,
+        Awaited<ReturnType<typeof getLeaveHistoryAuditLeaveLeaveRequestIdGet>>,
         TError,
         TData
       >
     > &
       Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getLeaveHistoryLeaveLeaveRequestIdGet>>,
+          Awaited<
+            ReturnType<typeof getLeaveHistoryAuditLeaveLeaveRequestIdGet>
+          >,
           TError,
-          Awaited<ReturnType<typeof getLeaveHistoryLeaveLeaveRequestIdGet>>
+          Awaited<ReturnType<typeof getLeaveHistoryAuditLeaveLeaveRequestIdGet>>
         >,
         "initialData"
       >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
-export function useGetLeaveHistoryLeaveLeaveRequestIdGet<
-  TData = Awaited<ReturnType<typeof getLeaveHistoryLeaveLeaveRequestIdGet>>,
-  TError = AxiosError<HTTPValidationError>,
+export function useGetLeaveHistoryAuditLeaveLeaveRequestIdGet<
+  TData = Awaited<
+    ReturnType<typeof getLeaveHistoryAuditLeaveLeaveRequestIdGet>
+  >,
+  TError = HTTPValidationError,
 >(
   leaveRequestId: number,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getLeaveHistoryLeaveLeaveRequestIdGet>>,
+        Awaited<ReturnType<typeof getLeaveHistoryAuditLeaveLeaveRequestIdGet>>,
         TError,
         TData
       >
     > &
       Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getLeaveHistoryLeaveLeaveRequestIdGet>>,
+          Awaited<
+            ReturnType<typeof getLeaveHistoryAuditLeaveLeaveRequestIdGet>
+          >,
           TError,
-          Awaited<ReturnType<typeof getLeaveHistoryLeaveLeaveRequestIdGet>>
+          Awaited<ReturnType<typeof getLeaveHistoryAuditLeaveLeaveRequestIdGet>>
         >,
         "initialData"
       >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
-export function useGetLeaveHistoryLeaveLeaveRequestIdGet<
-  TData = Awaited<ReturnType<typeof getLeaveHistoryLeaveLeaveRequestIdGet>>,
-  TError = AxiosError<HTTPValidationError>,
+export function useGetLeaveHistoryAuditLeaveLeaveRequestIdGet<
+  TData = Awaited<
+    ReturnType<typeof getLeaveHistoryAuditLeaveLeaveRequestIdGet>
+  >,
+  TError = HTTPValidationError,
 >(
   leaveRequestId: number,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getLeaveHistoryLeaveLeaveRequestIdGet>>,
+        Awaited<ReturnType<typeof getLeaveHistoryAuditLeaveLeaveRequestIdGet>>,
         TError,
         TData
       >
     >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -337,29 +356,32 @@ export function useGetLeaveHistoryLeaveLeaveRequestIdGet<
  * @summary Get Leave History
  */
 
-export function useGetLeaveHistoryLeaveLeaveRequestIdGet<
-  TData = Awaited<ReturnType<typeof getLeaveHistoryLeaveLeaveRequestIdGet>>,
-  TError = AxiosError<HTTPValidationError>,
+export function useGetLeaveHistoryAuditLeaveLeaveRequestIdGet<
+  TData = Awaited<
+    ReturnType<typeof getLeaveHistoryAuditLeaveLeaveRequestIdGet>
+  >,
+  TError = HTTPValidationError,
 >(
   leaveRequestId: number,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getLeaveHistoryLeaveLeaveRequestIdGet>>,
+        Awaited<ReturnType<typeof getLeaveHistoryAuditLeaveLeaveRequestIdGet>>,
         TError,
         TData
       >
     >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
-  const queryOptions = getGetLeaveHistoryLeaveLeaveRequestIdGetQueryOptions(
-    leaveRequestId,
-    options,
-  );
+  const queryOptions =
+    getGetLeaveHistoryAuditLeaveLeaveRequestIdGetQueryOptions(
+      leaveRequestId,
+      options,
+    );
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
     TData,

@@ -21,138 +21,322 @@ import type {
   UseQueryResult,
 } from "@tanstack/react-query";
 
-import axios from "axios";
-import type { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
-
 import type {
+  BodyUploadDocumentLeavesLeaveIdUploadPost,
+  DocumentRead,
   HTTPValidationError,
   LeaveRequestCreate,
   LeaveRequestRead,
   LeaveRequestUpdate,
-  ProcessLeaveStatusLeaveIdProcessPostParams,
+  ListLeavesLeavesGetParams,
+  ProcessLeaveStatusLeavesLeaveIdProcessPostParams,
 } from "../index.schemas";
+
+import { customInstance } from ".././axios-instance";
+
+type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 /**
  * @summary Create Leave Request
  */
-export const createLeaveRequestPost = (
+export const createLeaveRequestLeavesPost = (
   leaveRequestCreate: LeaveRequestCreate,
-  options?: AxiosRequestConfig,
-): Promise<AxiosResponse<LeaveRequestRead>> => {
-  return axios.post(`/`, leaveRequestCreate, options);
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<LeaveRequestRead>(
+    {
+      url: `/leaves/`,
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      data: leaveRequestCreate,
+      signal,
+    },
+    options,
+  );
 };
 
-export const getCreateLeaveRequestPostMutationOptions = <
-  TError = AxiosError<HTTPValidationError>,
+export const getCreateLeaveRequestLeavesPostMutationOptions = <
+  TError = HTTPValidationError,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof createLeaveRequestPost>>,
+    Awaited<ReturnType<typeof createLeaveRequestLeavesPost>>,
     TError,
     { data: LeaveRequestCreate },
     TContext
   >;
-  axios?: AxiosRequestConfig;
+  request?: SecondParameter<typeof customInstance>;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof createLeaveRequestPost>>,
+  Awaited<ReturnType<typeof createLeaveRequestLeavesPost>>,
   TError,
   { data: LeaveRequestCreate },
   TContext
 > => {
-  const mutationKey = ["createLeaveRequestPost"];
-  const { mutation: mutationOptions, axios: axiosOptions } = options
+  const mutationKey = ["createLeaveRequestLeavesPost"];
+  const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
       options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, axios: undefined };
+    : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof createLeaveRequestPost>>,
+    Awaited<ReturnType<typeof createLeaveRequestLeavesPost>>,
     { data: LeaveRequestCreate }
   > = (props) => {
     const { data } = props ?? {};
 
-    return createLeaveRequestPost(data, axiosOptions);
+    return createLeaveRequestLeavesPost(data, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type CreateLeaveRequestPostMutationResult = NonNullable<
-  Awaited<ReturnType<typeof createLeaveRequestPost>>
+export type CreateLeaveRequestLeavesPostMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createLeaveRequestLeavesPost>>
 >;
-export type CreateLeaveRequestPostMutationBody = LeaveRequestCreate;
-export type CreateLeaveRequestPostMutationError =
-  AxiosError<HTTPValidationError>;
+export type CreateLeaveRequestLeavesPostMutationBody = LeaveRequestCreate;
+export type CreateLeaveRequestLeavesPostMutationError = HTTPValidationError;
 
 /**
  * @summary Create Leave Request
  */
-export const useCreateLeaveRequestPost = <
-  TError = AxiosError<HTTPValidationError>,
+export const useCreateLeaveRequestLeavesPost = <
+  TError = HTTPValidationError,
   TContext = unknown,
 >(
   options?: {
     mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof createLeaveRequestPost>>,
+      Awaited<ReturnType<typeof createLeaveRequestLeavesPost>>,
       TError,
       { data: LeaveRequestCreate },
       TContext
     >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseMutationResult<
-  Awaited<ReturnType<typeof createLeaveRequestPost>>,
+  Awaited<ReturnType<typeof createLeaveRequestLeavesPost>>,
   TError,
   { data: LeaveRequestCreate },
   TContext
 > => {
-  const mutationOptions = getCreateLeaveRequestPostMutationOptions(options);
+  const mutationOptions =
+    getCreateLeaveRequestLeavesPostMutationOptions(options);
 
   return useMutation(mutationOptions, queryClient);
 };
 /**
+ * @summary List Leaves
+ */
+export const listLeavesLeavesGet = (
+  params?: ListLeavesLeavesGetParams,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<LeaveRequestRead[]>(
+    { url: `/leaves/`, method: "GET", params, signal },
+    options,
+  );
+};
+
+export const getListLeavesLeavesGetQueryKey = (
+  params?: ListLeavesLeavesGetParams,
+) => {
+  return [`/leaves/`, ...(params ? [params] : [])] as const;
+};
+
+export const getListLeavesLeavesGetQueryOptions = <
+  TData = Awaited<ReturnType<typeof listLeavesLeavesGet>>,
+  TError = HTTPValidationError,
+>(
+  params?: ListLeavesLeavesGetParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof listLeavesLeavesGet>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getListLeavesLeavesGetQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof listLeavesLeavesGet>>
+  > = ({ signal }) => listLeavesLeavesGet(params, requestOptions, signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listLeavesLeavesGet>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type ListLeavesLeavesGetQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listLeavesLeavesGet>>
+>;
+export type ListLeavesLeavesGetQueryError = HTTPValidationError;
+
+export function useListLeavesLeavesGet<
+  TData = Awaited<ReturnType<typeof listLeavesLeavesGet>>,
+  TError = HTTPValidationError,
+>(
+  params: undefined | ListLeavesLeavesGetParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof listLeavesLeavesGet>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listLeavesLeavesGet>>,
+          TError,
+          Awaited<ReturnType<typeof listLeavesLeavesGet>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useListLeavesLeavesGet<
+  TData = Awaited<ReturnType<typeof listLeavesLeavesGet>>,
+  TError = HTTPValidationError,
+>(
+  params?: ListLeavesLeavesGetParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof listLeavesLeavesGet>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listLeavesLeavesGet>>,
+          TError,
+          Awaited<ReturnType<typeof listLeavesLeavesGet>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useListLeavesLeavesGet<
+  TData = Awaited<ReturnType<typeof listLeavesLeavesGet>>,
+  TError = HTTPValidationError,
+>(
+  params?: ListLeavesLeavesGetParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof listLeavesLeavesGet>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary List Leaves
+ */
+
+export function useListLeavesLeavesGet<
+  TData = Awaited<ReturnType<typeof listLeavesLeavesGet>>,
+  TError = HTTPValidationError,
+>(
+  params?: ListLeavesLeavesGetParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof listLeavesLeavesGet>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getListLeavesLeavesGetQueryOptions(params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+/**
  * @summary Get Leave Detail
  */
-export const getLeaveDetailLeaveIdGet = (
+export const getLeaveDetailLeavesLeaveIdGet = (
   leaveId: number,
-  options?: AxiosRequestConfig,
-): Promise<AxiosResponse<LeaveRequestRead>> => {
-  return axios.get(`/${leaveId}`, options);
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<LeaveRequestRead>(
+    { url: `/leaves/${leaveId}`, method: "GET", signal },
+    options,
+  );
 };
 
-export const getGetLeaveDetailLeaveIdGetQueryKey = (leaveId?: number) => {
-  return [`/${leaveId}`] as const;
+export const getGetLeaveDetailLeavesLeaveIdGetQueryKey = (leaveId?: number) => {
+  return [`/leaves/${leaveId}`] as const;
 };
 
-export const getGetLeaveDetailLeaveIdGetQueryOptions = <
-  TData = Awaited<ReturnType<typeof getLeaveDetailLeaveIdGet>>,
-  TError = AxiosError<HTTPValidationError>,
+export const getGetLeaveDetailLeavesLeaveIdGetQueryOptions = <
+  TData = Awaited<ReturnType<typeof getLeaveDetailLeavesLeaveIdGet>>,
+  TError = HTTPValidationError,
 >(
   leaveId: number,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getLeaveDetailLeaveIdGet>>,
+        Awaited<ReturnType<typeof getLeaveDetailLeavesLeaveIdGet>>,
         TError,
         TData
       >
     >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
 ) => {
-  const { query: queryOptions, axios: axiosOptions } = options ?? {};
+  const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey =
-    queryOptions?.queryKey ?? getGetLeaveDetailLeaveIdGetQueryKey(leaveId);
+    queryOptions?.queryKey ??
+    getGetLeaveDetailLeavesLeaveIdGetQueryKey(leaveId);
 
   const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof getLeaveDetailLeaveIdGet>>
+    Awaited<ReturnType<typeof getLeaveDetailLeavesLeaveIdGet>>
   > = ({ signal }) =>
-    getLeaveDetailLeaveIdGet(leaveId, { signal, ...axiosOptions });
+    getLeaveDetailLeavesLeaveIdGet(leaveId, requestOptions, signal);
 
   return {
     queryKey,
@@ -160,86 +344,85 @@ export const getGetLeaveDetailLeaveIdGetQueryOptions = <
     enabled: !!leaveId,
     ...queryOptions,
   } as UseQueryOptions<
-    Awaited<ReturnType<typeof getLeaveDetailLeaveIdGet>>,
+    Awaited<ReturnType<typeof getLeaveDetailLeavesLeaveIdGet>>,
     TError,
     TData
   > & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
-export type GetLeaveDetailLeaveIdGetQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getLeaveDetailLeaveIdGet>>
+export type GetLeaveDetailLeavesLeaveIdGetQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getLeaveDetailLeavesLeaveIdGet>>
 >;
-export type GetLeaveDetailLeaveIdGetQueryError =
-  AxiosError<HTTPValidationError>;
+export type GetLeaveDetailLeavesLeaveIdGetQueryError = HTTPValidationError;
 
-export function useGetLeaveDetailLeaveIdGet<
-  TData = Awaited<ReturnType<typeof getLeaveDetailLeaveIdGet>>,
-  TError = AxiosError<HTTPValidationError>,
+export function useGetLeaveDetailLeavesLeaveIdGet<
+  TData = Awaited<ReturnType<typeof getLeaveDetailLeavesLeaveIdGet>>,
+  TError = HTTPValidationError,
 >(
   leaveId: number,
   options: {
     query: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getLeaveDetailLeaveIdGet>>,
+        Awaited<ReturnType<typeof getLeaveDetailLeavesLeaveIdGet>>,
         TError,
         TData
       >
     > &
       Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getLeaveDetailLeaveIdGet>>,
+          Awaited<ReturnType<typeof getLeaveDetailLeavesLeaveIdGet>>,
           TError,
-          Awaited<ReturnType<typeof getLeaveDetailLeaveIdGet>>
+          Awaited<ReturnType<typeof getLeaveDetailLeavesLeaveIdGet>>
         >,
         "initialData"
       >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
-export function useGetLeaveDetailLeaveIdGet<
-  TData = Awaited<ReturnType<typeof getLeaveDetailLeaveIdGet>>,
-  TError = AxiosError<HTTPValidationError>,
+export function useGetLeaveDetailLeavesLeaveIdGet<
+  TData = Awaited<ReturnType<typeof getLeaveDetailLeavesLeaveIdGet>>,
+  TError = HTTPValidationError,
 >(
   leaveId: number,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getLeaveDetailLeaveIdGet>>,
+        Awaited<ReturnType<typeof getLeaveDetailLeavesLeaveIdGet>>,
         TError,
         TData
       >
     > &
       Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getLeaveDetailLeaveIdGet>>,
+          Awaited<ReturnType<typeof getLeaveDetailLeavesLeaveIdGet>>,
           TError,
-          Awaited<ReturnType<typeof getLeaveDetailLeaveIdGet>>
+          Awaited<ReturnType<typeof getLeaveDetailLeavesLeaveIdGet>>
         >,
         "initialData"
       >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
-export function useGetLeaveDetailLeaveIdGet<
-  TData = Awaited<ReturnType<typeof getLeaveDetailLeaveIdGet>>,
-  TError = AxiosError<HTTPValidationError>,
+export function useGetLeaveDetailLeavesLeaveIdGet<
+  TData = Awaited<ReturnType<typeof getLeaveDetailLeavesLeaveIdGet>>,
+  TError = HTTPValidationError,
 >(
   leaveId: number,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getLeaveDetailLeaveIdGet>>,
+        Awaited<ReturnType<typeof getLeaveDetailLeavesLeaveIdGet>>,
         TError,
         TData
       >
     >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -249,26 +432,26 @@ export function useGetLeaveDetailLeaveIdGet<
  * @summary Get Leave Detail
  */
 
-export function useGetLeaveDetailLeaveIdGet<
-  TData = Awaited<ReturnType<typeof getLeaveDetailLeaveIdGet>>,
-  TError = AxiosError<HTTPValidationError>,
+export function useGetLeaveDetailLeavesLeaveIdGet<
+  TData = Awaited<ReturnType<typeof getLeaveDetailLeavesLeaveIdGet>>,
+  TError = HTTPValidationError,
 >(
   leaveId: number,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getLeaveDetailLeaveIdGet>>,
+        Awaited<ReturnType<typeof getLeaveDetailLeavesLeaveIdGet>>,
         TError,
         TData
       >
     >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
-  const queryOptions = getGetLeaveDetailLeaveIdGetQueryOptions(
+  const queryOptions = getGetLeaveDetailLeavesLeaveIdGetQueryOptions(
     leaveId,
     options,
   );
@@ -286,84 +469,93 @@ export function useGetLeaveDetailLeaveIdGet<
 /**
  * @summary Update Leave Request
  */
-export const updateLeaveRequestLeaveIdPatch = (
+export const updateLeaveRequestLeavesLeaveIdPatch = (
   leaveId: number,
   leaveRequestUpdate: LeaveRequestUpdate,
-  options?: AxiosRequestConfig,
-): Promise<AxiosResponse<LeaveRequestRead>> => {
-  return axios.patch(`/${leaveId}`, leaveRequestUpdate, options);
+  options?: SecondParameter<typeof customInstance>,
+) => {
+  return customInstance<LeaveRequestRead>(
+    {
+      url: `/leaves/${leaveId}`,
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      data: leaveRequestUpdate,
+    },
+    options,
+  );
 };
 
-export const getUpdateLeaveRequestLeaveIdPatchMutationOptions = <
-  TError = AxiosError<HTTPValidationError>,
+export const getUpdateLeaveRequestLeavesLeaveIdPatchMutationOptions = <
+  TError = HTTPValidationError,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof updateLeaveRequestLeaveIdPatch>>,
+    Awaited<ReturnType<typeof updateLeaveRequestLeavesLeaveIdPatch>>,
     TError,
     { leaveId: number; data: LeaveRequestUpdate },
     TContext
   >;
-  axios?: AxiosRequestConfig;
+  request?: SecondParameter<typeof customInstance>;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof updateLeaveRequestLeaveIdPatch>>,
+  Awaited<ReturnType<typeof updateLeaveRequestLeavesLeaveIdPatch>>,
   TError,
   { leaveId: number; data: LeaveRequestUpdate },
   TContext
 > => {
-  const mutationKey = ["updateLeaveRequestLeaveIdPatch"];
-  const { mutation: mutationOptions, axios: axiosOptions } = options
+  const mutationKey = ["updateLeaveRequestLeavesLeaveIdPatch"];
+  const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
       options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, axios: undefined };
+    : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof updateLeaveRequestLeaveIdPatch>>,
+    Awaited<ReturnType<typeof updateLeaveRequestLeavesLeaveIdPatch>>,
     { leaveId: number; data: LeaveRequestUpdate }
   > = (props) => {
     const { leaveId, data } = props ?? {};
 
-    return updateLeaveRequestLeaveIdPatch(leaveId, data, axiosOptions);
+    return updateLeaveRequestLeavesLeaveIdPatch(leaveId, data, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type UpdateLeaveRequestLeaveIdPatchMutationResult = NonNullable<
-  Awaited<ReturnType<typeof updateLeaveRequestLeaveIdPatch>>
+export type UpdateLeaveRequestLeavesLeaveIdPatchMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateLeaveRequestLeavesLeaveIdPatch>>
 >;
-export type UpdateLeaveRequestLeaveIdPatchMutationBody = LeaveRequestUpdate;
-export type UpdateLeaveRequestLeaveIdPatchMutationError =
-  AxiosError<HTTPValidationError>;
+export type UpdateLeaveRequestLeavesLeaveIdPatchMutationBody =
+  LeaveRequestUpdate;
+export type UpdateLeaveRequestLeavesLeaveIdPatchMutationError =
+  HTTPValidationError;
 
 /**
  * @summary Update Leave Request
  */
-export const useUpdateLeaveRequestLeaveIdPatch = <
-  TError = AxiosError<HTTPValidationError>,
+export const useUpdateLeaveRequestLeavesLeaveIdPatch = <
+  TError = HTTPValidationError,
   TContext = unknown,
 >(
   options?: {
     mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof updateLeaveRequestLeaveIdPatch>>,
+      Awaited<ReturnType<typeof updateLeaveRequestLeavesLeaveIdPatch>>,
       TError,
       { leaveId: number; data: LeaveRequestUpdate },
       TContext
     >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseMutationResult<
-  Awaited<ReturnType<typeof updateLeaveRequestLeaveIdPatch>>,
+  Awaited<ReturnType<typeof updateLeaveRequestLeavesLeaveIdPatch>>,
   TError,
   { leaveId: number; data: LeaveRequestUpdate },
   TContext
 > => {
   const mutationOptions =
-    getUpdateLeaveRequestLeaveIdPatchMutationOptions(options);
+    getUpdateLeaveRequestLeavesLeaveIdPatchMutationOptions(options);
 
   return useMutation(mutationOptions, queryClient);
 };
@@ -372,87 +564,437 @@ export const useUpdateLeaveRequestLeaveIdPatch = <
 Triggers external sync if Approved.
  * @summary Process Leave Status
  */
-export const processLeaveStatusLeaveIdProcessPost = (
+export const processLeaveStatusLeavesLeaveIdProcessPost = (
   leaveId: number,
-  params: ProcessLeaveStatusLeaveIdProcessPostParams,
-  options?: AxiosRequestConfig,
-): Promise<AxiosResponse<LeaveRequestRead>> => {
-  return axios.post(`/${leaveId}/process`, undefined, {
-    ...options,
-    params: { ...params, ...options?.params },
-  });
+  params: ProcessLeaveStatusLeavesLeaveIdProcessPostParams,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<LeaveRequestRead>(
+    { url: `/leaves/${leaveId}/process`, method: "POST", params, signal },
+    options,
+  );
 };
 
-export const getProcessLeaveStatusLeaveIdProcessPostMutationOptions = <
-  TError = AxiosError<HTTPValidationError>,
+export const getProcessLeaveStatusLeavesLeaveIdProcessPostMutationOptions = <
+  TError = HTTPValidationError,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof processLeaveStatusLeaveIdProcessPost>>,
+    Awaited<ReturnType<typeof processLeaveStatusLeavesLeaveIdProcessPost>>,
     TError,
-    { leaveId: number; params: ProcessLeaveStatusLeaveIdProcessPostParams },
+    {
+      leaveId: number;
+      params: ProcessLeaveStatusLeavesLeaveIdProcessPostParams;
+    },
     TContext
   >;
-  axios?: AxiosRequestConfig;
+  request?: SecondParameter<typeof customInstance>;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof processLeaveStatusLeaveIdProcessPost>>,
+  Awaited<ReturnType<typeof processLeaveStatusLeavesLeaveIdProcessPost>>,
   TError,
-  { leaveId: number; params: ProcessLeaveStatusLeaveIdProcessPostParams },
+  { leaveId: number; params: ProcessLeaveStatusLeavesLeaveIdProcessPostParams },
   TContext
 > => {
-  const mutationKey = ["processLeaveStatusLeaveIdProcessPost"];
-  const { mutation: mutationOptions, axios: axiosOptions } = options
+  const mutationKey = ["processLeaveStatusLeavesLeaveIdProcessPost"];
+  const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
       options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, axios: undefined };
+    : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof processLeaveStatusLeaveIdProcessPost>>,
-    { leaveId: number; params: ProcessLeaveStatusLeaveIdProcessPostParams }
+    Awaited<ReturnType<typeof processLeaveStatusLeavesLeaveIdProcessPost>>,
+    {
+      leaveId: number;
+      params: ProcessLeaveStatusLeavesLeaveIdProcessPostParams;
+    }
   > = (props) => {
     const { leaveId, params } = props ?? {};
 
-    return processLeaveStatusLeaveIdProcessPost(leaveId, params, axiosOptions);
+    return processLeaveStatusLeavesLeaveIdProcessPost(
+      leaveId,
+      params,
+      requestOptions,
+    );
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type ProcessLeaveStatusLeaveIdProcessPostMutationResult = NonNullable<
-  Awaited<ReturnType<typeof processLeaveStatusLeaveIdProcessPost>>
->;
+export type ProcessLeaveStatusLeavesLeaveIdProcessPostMutationResult =
+  NonNullable<
+    Awaited<ReturnType<typeof processLeaveStatusLeavesLeaveIdProcessPost>>
+  >;
 
-export type ProcessLeaveStatusLeaveIdProcessPostMutationError =
-  AxiosError<HTTPValidationError>;
+export type ProcessLeaveStatusLeavesLeaveIdProcessPostMutationError =
+  HTTPValidationError;
 
 /**
  * @summary Process Leave Status
  */
-export const useProcessLeaveStatusLeaveIdProcessPost = <
-  TError = AxiosError<HTTPValidationError>,
+export const useProcessLeaveStatusLeavesLeaveIdProcessPost = <
+  TError = HTTPValidationError,
   TContext = unknown,
 >(
   options?: {
     mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof processLeaveStatusLeaveIdProcessPost>>,
+      Awaited<ReturnType<typeof processLeaveStatusLeavesLeaveIdProcessPost>>,
       TError,
-      { leaveId: number; params: ProcessLeaveStatusLeaveIdProcessPostParams },
+      {
+        leaveId: number;
+        params: ProcessLeaveStatusLeavesLeaveIdProcessPostParams;
+      },
       TContext
     >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseMutationResult<
-  Awaited<ReturnType<typeof processLeaveStatusLeaveIdProcessPost>>,
+  Awaited<ReturnType<typeof processLeaveStatusLeavesLeaveIdProcessPost>>,
   TError,
-  { leaveId: number; params: ProcessLeaveStatusLeaveIdProcessPostParams },
+  { leaveId: number; params: ProcessLeaveStatusLeavesLeaveIdProcessPostParams },
   TContext
 > => {
   const mutationOptions =
-    getProcessLeaveStatusLeaveIdProcessPostMutationOptions(options);
+    getProcessLeaveStatusLeavesLeaveIdProcessPostMutationOptions(options);
 
   return useMutation(mutationOptions, queryClient);
 };
+/**
+ * Upload a file linked to a specific leave request.
+ * @summary Upload Document
+ */
+export const uploadDocumentLeavesLeaveIdUploadPost = (
+  leaveId: number,
+  bodyUploadDocumentLeavesLeaveIdUploadPost: BodyUploadDocumentLeavesLeaveIdUploadPost,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  const formData = new FormData();
+  formData.append(`file`, bodyUploadDocumentLeavesLeaveIdUploadPost.file);
+
+  return customInstance<DocumentRead>(
+    {
+      url: `/leaves/${leaveId}/upload`,
+      method: "POST",
+      headers: { "Content-Type": "multipart/form-data" },
+      data: formData,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getUploadDocumentLeavesLeaveIdUploadPostMutationOptions = <
+  TError = HTTPValidationError,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof uploadDocumentLeavesLeaveIdUploadPost>>,
+    TError,
+    { leaveId: number; data: BodyUploadDocumentLeavesLeaveIdUploadPost },
+    TContext
+  >;
+  request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof uploadDocumentLeavesLeaveIdUploadPost>>,
+  TError,
+  { leaveId: number; data: BodyUploadDocumentLeavesLeaveIdUploadPost },
+  TContext
+> => {
+  const mutationKey = ["uploadDocumentLeavesLeaveIdUploadPost"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof uploadDocumentLeavesLeaveIdUploadPost>>,
+    { leaveId: number; data: BodyUploadDocumentLeavesLeaveIdUploadPost }
+  > = (props) => {
+    const { leaveId, data } = props ?? {};
+
+    return uploadDocumentLeavesLeaveIdUploadPost(leaveId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UploadDocumentLeavesLeaveIdUploadPostMutationResult = NonNullable<
+  Awaited<ReturnType<typeof uploadDocumentLeavesLeaveIdUploadPost>>
+>;
+export type UploadDocumentLeavesLeaveIdUploadPostMutationBody =
+  BodyUploadDocumentLeavesLeaveIdUploadPost;
+export type UploadDocumentLeavesLeaveIdUploadPostMutationError =
+  HTTPValidationError;
+
+/**
+ * @summary Upload Document
+ */
+export const useUploadDocumentLeavesLeaveIdUploadPost = <
+  TError = HTTPValidationError,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof uploadDocumentLeavesLeaveIdUploadPost>>,
+      TError,
+      { leaveId: number; data: BodyUploadDocumentLeavesLeaveIdUploadPost },
+      TContext
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof uploadDocumentLeavesLeaveIdUploadPost>>,
+  TError,
+  { leaveId: number; data: BodyUploadDocumentLeavesLeaveIdUploadPost },
+  TContext
+> => {
+  const mutationOptions =
+    getUploadDocumentLeavesLeaveIdUploadPostMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+/**
+ * @summary Download Document
+ */
+export const downloadDocumentLeavesDocumentsDocumentIdDownloadGet = (
+  documentId: number,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<unknown>(
+    { url: `/leaves/documents/${documentId}/download`, method: "GET", signal },
+    options,
+  );
+};
+
+export const getDownloadDocumentLeavesDocumentsDocumentIdDownloadGetQueryKey = (
+  documentId?: number,
+) => {
+  return [`/leaves/documents/${documentId}/download`] as const;
+};
+
+export const getDownloadDocumentLeavesDocumentsDocumentIdDownloadGetQueryOptions =
+  <
+    TData = Awaited<
+      ReturnType<typeof downloadDocumentLeavesDocumentsDocumentIdDownloadGet>
+    >,
+    TError = HTTPValidationError,
+  >(
+    documentId: number,
+    options?: {
+      query?: Partial<
+        UseQueryOptions<
+          Awaited<
+            ReturnType<
+              typeof downloadDocumentLeavesDocumentsDocumentIdDownloadGet
+            >
+          >,
+          TError,
+          TData
+        >
+      >;
+      request?: SecondParameter<typeof customInstance>;
+    },
+  ) => {
+    const { query: queryOptions, request: requestOptions } = options ?? {};
+
+    const queryKey =
+      queryOptions?.queryKey ??
+      getDownloadDocumentLeavesDocumentsDocumentIdDownloadGetQueryKey(
+        documentId,
+      );
+
+    const queryFn: QueryFunction<
+      Awaited<
+        ReturnType<typeof downloadDocumentLeavesDocumentsDocumentIdDownloadGet>
+      >
+    > = ({ signal }) =>
+      downloadDocumentLeavesDocumentsDocumentIdDownloadGet(
+        documentId,
+        requestOptions,
+        signal,
+      );
+
+    return {
+      queryKey,
+      queryFn,
+      enabled: !!documentId,
+      ...queryOptions,
+    } as UseQueryOptions<
+      Awaited<
+        ReturnType<typeof downloadDocumentLeavesDocumentsDocumentIdDownloadGet>
+      >,
+      TError,
+      TData
+    > & { queryKey: DataTag<QueryKey, TData, TError> };
+  };
+
+export type DownloadDocumentLeavesDocumentsDocumentIdDownloadGetQueryResult =
+  NonNullable<
+    Awaited<
+      ReturnType<typeof downloadDocumentLeavesDocumentsDocumentIdDownloadGet>
+    >
+  >;
+export type DownloadDocumentLeavesDocumentsDocumentIdDownloadGetQueryError =
+  HTTPValidationError;
+
+export function useDownloadDocumentLeavesDocumentsDocumentIdDownloadGet<
+  TData = Awaited<
+    ReturnType<typeof downloadDocumentLeavesDocumentsDocumentIdDownloadGet>
+  >,
+  TError = HTTPValidationError,
+>(
+  documentId: number,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<
+          ReturnType<
+            typeof downloadDocumentLeavesDocumentsDocumentIdDownloadGet
+          >
+        >,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<
+            ReturnType<
+              typeof downloadDocumentLeavesDocumentsDocumentIdDownloadGet
+            >
+          >,
+          TError,
+          Awaited<
+            ReturnType<
+              typeof downloadDocumentLeavesDocumentsDocumentIdDownloadGet
+            >
+          >
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useDownloadDocumentLeavesDocumentsDocumentIdDownloadGet<
+  TData = Awaited<
+    ReturnType<typeof downloadDocumentLeavesDocumentsDocumentIdDownloadGet>
+  >,
+  TError = HTTPValidationError,
+>(
+  documentId: number,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<
+          ReturnType<
+            typeof downloadDocumentLeavesDocumentsDocumentIdDownloadGet
+          >
+        >,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<
+            ReturnType<
+              typeof downloadDocumentLeavesDocumentsDocumentIdDownloadGet
+            >
+          >,
+          TError,
+          Awaited<
+            ReturnType<
+              typeof downloadDocumentLeavesDocumentsDocumentIdDownloadGet
+            >
+          >
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useDownloadDocumentLeavesDocumentsDocumentIdDownloadGet<
+  TData = Awaited<
+    ReturnType<typeof downloadDocumentLeavesDocumentsDocumentIdDownloadGet>
+  >,
+  TError = HTTPValidationError,
+>(
+  documentId: number,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<
+          ReturnType<
+            typeof downloadDocumentLeavesDocumentsDocumentIdDownloadGet
+          >
+        >,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Download Document
+ */
+
+export function useDownloadDocumentLeavesDocumentsDocumentIdDownloadGet<
+  TData = Awaited<
+    ReturnType<typeof downloadDocumentLeavesDocumentsDocumentIdDownloadGet>
+  >,
+  TError = HTTPValidationError,
+>(
+  documentId: number,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<
+          ReturnType<
+            typeof downloadDocumentLeavesDocumentsDocumentIdDownloadGet
+          >
+        >,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions =
+    getDownloadDocumentLeavesDocumentsDocumentIdDownloadGetQueryOptions(
+      documentId,
+      options,
+    );
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}

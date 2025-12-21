@@ -24,7 +24,7 @@ class AuditLogRead(SQLModel):
     We nest the 'actor' so the UI can display names immediately.
     """
     id: int
-    leave_request_id: int
+    leave_request_id: Optional[int]
     action: str
     field_changed: Optional[str]
     old_value: Optional[str]
@@ -38,7 +38,7 @@ router = APIRouter()
 # Import and use this function in leaves.py, users.py etc.
 def create_audit_log(
     session: Session,
-    leave_request_id: int,
+    leave_request_id: Optional[int],
     actor_user_id: int,
     action: str,
     field_changed: Optional[str] = None,

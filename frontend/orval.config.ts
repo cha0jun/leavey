@@ -7,6 +7,12 @@ export default defineConfig({
             target: './lib/api/index.ts',
             client: 'react-query',
             mode: 'tags-split',
+            override: {
+                mutator: {
+                    path: './lib/api/axios-instance.ts',
+                    name: 'customInstance',
+                },
+            },
         },
         hooks: {
             afterAllFilesWrite: 'npx prettier --write',

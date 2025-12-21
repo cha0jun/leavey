@@ -18,147 +18,177 @@ import type {
   UseQueryResult,
 } from "@tanstack/react-query";
 
-import axios from "axios";
-import type { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
-
 import type {
-  ExportReconciliationCsvExportGetParams,
+  ExportReconciliationCsvFinanceExportGetParams,
   FinanceSummary,
-  GetMonthlyReconciliationReconciliationGetParams,
+  GetMonthlyReconciliationFinanceReconciliationGetParams,
   HTTPValidationError,
 } from "../index.schemas";
+
+import { customInstance } from ".././axios-instance";
+
+type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 /**
  * Dashboard View: Returns JSON data for the frontend table.
  * @summary Get Monthly Reconciliation
  */
-export const getMonthlyReconciliationReconciliationGet = (
-  params: GetMonthlyReconciliationReconciliationGetParams,
-  options?: AxiosRequestConfig,
-): Promise<AxiosResponse<FinanceSummary>> => {
-  return axios.get(`/reconciliation`, {
-    ...options,
-    params: { ...params, ...options?.params },
-  });
-};
-
-export const getGetMonthlyReconciliationReconciliationGetQueryKey = (
-  params?: GetMonthlyReconciliationReconciliationGetParams,
+export const getMonthlyReconciliationFinanceReconciliationGet = (
+  params: GetMonthlyReconciliationFinanceReconciliationGetParams,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
 ) => {
-  return [`/reconciliation`, ...(params ? [params] : [])] as const;
+  return customInstance<FinanceSummary>(
+    { url: `/finance/reconciliation`, method: "GET", params, signal },
+    options,
+  );
 };
 
-export const getGetMonthlyReconciliationReconciliationGetQueryOptions = <
-  TData = Awaited<ReturnType<typeof getMonthlyReconciliationReconciliationGet>>,
-  TError = AxiosError<HTTPValidationError>,
+export const getGetMonthlyReconciliationFinanceReconciliationGetQueryKey = (
+  params?: GetMonthlyReconciliationFinanceReconciliationGetParams,
+) => {
+  return [`/finance/reconciliation`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetMonthlyReconciliationFinanceReconciliationGetQueryOptions = <
+  TData = Awaited<
+    ReturnType<typeof getMonthlyReconciliationFinanceReconciliationGet>
+  >,
+  TError = HTTPValidationError,
 >(
-  params: GetMonthlyReconciliationReconciliationGetParams,
+  params: GetMonthlyReconciliationFinanceReconciliationGetParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getMonthlyReconciliationReconciliationGet>>,
+        Awaited<
+          ReturnType<typeof getMonthlyReconciliationFinanceReconciliationGet>
+        >,
         TError,
         TData
       >
     >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
 ) => {
-  const { query: queryOptions, axios: axiosOptions } = options ?? {};
+  const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey =
     queryOptions?.queryKey ??
-    getGetMonthlyReconciliationReconciliationGetQueryKey(params);
+    getGetMonthlyReconciliationFinanceReconciliationGetQueryKey(params);
 
   const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof getMonthlyReconciliationReconciliationGet>>
+    Awaited<ReturnType<typeof getMonthlyReconciliationFinanceReconciliationGet>>
   > = ({ signal }) =>
-    getMonthlyReconciliationReconciliationGet(params, {
+    getMonthlyReconciliationFinanceReconciliationGet(
+      params,
+      requestOptions,
       signal,
-      ...axiosOptions,
-    });
+    );
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof getMonthlyReconciliationReconciliationGet>>,
+    Awaited<
+      ReturnType<typeof getMonthlyReconciliationFinanceReconciliationGet>
+    >,
     TError,
     TData
   > & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
-export type GetMonthlyReconciliationReconciliationGetQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getMonthlyReconciliationReconciliationGet>>
->;
-export type GetMonthlyReconciliationReconciliationGetQueryError =
-  AxiosError<HTTPValidationError>;
+export type GetMonthlyReconciliationFinanceReconciliationGetQueryResult =
+  NonNullable<
+    Awaited<ReturnType<typeof getMonthlyReconciliationFinanceReconciliationGet>>
+  >;
+export type GetMonthlyReconciliationFinanceReconciliationGetQueryError =
+  HTTPValidationError;
 
-export function useGetMonthlyReconciliationReconciliationGet<
-  TData = Awaited<ReturnType<typeof getMonthlyReconciliationReconciliationGet>>,
-  TError = AxiosError<HTTPValidationError>,
+export function useGetMonthlyReconciliationFinanceReconciliationGet<
+  TData = Awaited<
+    ReturnType<typeof getMonthlyReconciliationFinanceReconciliationGet>
+  >,
+  TError = HTTPValidationError,
 >(
-  params: GetMonthlyReconciliationReconciliationGetParams,
+  params: GetMonthlyReconciliationFinanceReconciliationGetParams,
   options: {
     query: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getMonthlyReconciliationReconciliationGet>>,
+        Awaited<
+          ReturnType<typeof getMonthlyReconciliationFinanceReconciliationGet>
+        >,
         TError,
         TData
       >
     > &
       Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getMonthlyReconciliationReconciliationGet>>,
+          Awaited<
+            ReturnType<typeof getMonthlyReconciliationFinanceReconciliationGet>
+          >,
           TError,
-          Awaited<ReturnType<typeof getMonthlyReconciliationReconciliationGet>>
+          Awaited<
+            ReturnType<typeof getMonthlyReconciliationFinanceReconciliationGet>
+          >
         >,
         "initialData"
       >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
-export function useGetMonthlyReconciliationReconciliationGet<
-  TData = Awaited<ReturnType<typeof getMonthlyReconciliationReconciliationGet>>,
-  TError = AxiosError<HTTPValidationError>,
+export function useGetMonthlyReconciliationFinanceReconciliationGet<
+  TData = Awaited<
+    ReturnType<typeof getMonthlyReconciliationFinanceReconciliationGet>
+  >,
+  TError = HTTPValidationError,
 >(
-  params: GetMonthlyReconciliationReconciliationGetParams,
+  params: GetMonthlyReconciliationFinanceReconciliationGetParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getMonthlyReconciliationReconciliationGet>>,
+        Awaited<
+          ReturnType<typeof getMonthlyReconciliationFinanceReconciliationGet>
+        >,
         TError,
         TData
       >
     > &
       Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getMonthlyReconciliationReconciliationGet>>,
+          Awaited<
+            ReturnType<typeof getMonthlyReconciliationFinanceReconciliationGet>
+          >,
           TError,
-          Awaited<ReturnType<typeof getMonthlyReconciliationReconciliationGet>>
+          Awaited<
+            ReturnType<typeof getMonthlyReconciliationFinanceReconciliationGet>
+          >
         >,
         "initialData"
       >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
-export function useGetMonthlyReconciliationReconciliationGet<
-  TData = Awaited<ReturnType<typeof getMonthlyReconciliationReconciliationGet>>,
-  TError = AxiosError<HTTPValidationError>,
+export function useGetMonthlyReconciliationFinanceReconciliationGet<
+  TData = Awaited<
+    ReturnType<typeof getMonthlyReconciliationFinanceReconciliationGet>
+  >,
+  TError = HTTPValidationError,
 >(
-  params: GetMonthlyReconciliationReconciliationGetParams,
+  params: GetMonthlyReconciliationFinanceReconciliationGetParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getMonthlyReconciliationReconciliationGet>>,
+        Awaited<
+          ReturnType<typeof getMonthlyReconciliationFinanceReconciliationGet>
+        >,
         TError,
         TData
       >
     >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -168,29 +198,34 @@ export function useGetMonthlyReconciliationReconciliationGet<
  * @summary Get Monthly Reconciliation
  */
 
-export function useGetMonthlyReconciliationReconciliationGet<
-  TData = Awaited<ReturnType<typeof getMonthlyReconciliationReconciliationGet>>,
-  TError = AxiosError<HTTPValidationError>,
+export function useGetMonthlyReconciliationFinanceReconciliationGet<
+  TData = Awaited<
+    ReturnType<typeof getMonthlyReconciliationFinanceReconciliationGet>
+  >,
+  TError = HTTPValidationError,
 >(
-  params: GetMonthlyReconciliationReconciliationGetParams,
+  params: GetMonthlyReconciliationFinanceReconciliationGetParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getMonthlyReconciliationReconciliationGet>>,
+        Awaited<
+          ReturnType<typeof getMonthlyReconciliationFinanceReconciliationGet>
+        >,
         TError,
         TData
       >
     >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
-  const queryOptions = getGetMonthlyReconciliationReconciliationGetQueryOptions(
-    params,
-    options,
-  );
+  const queryOptions =
+    getGetMonthlyReconciliationFinanceReconciliationGetQueryOptions(
+      params,
+      options,
+    );
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
     TData,
@@ -207,130 +242,131 @@ export function useGetMonthlyReconciliationReconciliationGet<
 Essential for Finance Officers who love Excel.
  * @summary Export Reconciliation Csv
  */
-export const exportReconciliationCsvExportGet = (
-  params: ExportReconciliationCsvExportGetParams,
-  options?: AxiosRequestConfig,
-): Promise<AxiosResponse<unknown>> => {
-  return axios.get(`/export`, {
-    ...options,
-    params: { ...params, ...options?.params },
-  });
-};
-
-export const getExportReconciliationCsvExportGetQueryKey = (
-  params?: ExportReconciliationCsvExportGetParams,
+export const exportReconciliationCsvFinanceExportGet = (
+  params: ExportReconciliationCsvFinanceExportGetParams,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
 ) => {
-  return [`/export`, ...(params ? [params] : [])] as const;
+  return customInstance<unknown>(
+    { url: `/finance/export`, method: "GET", params, signal },
+    options,
+  );
 };
 
-export const getExportReconciliationCsvExportGetQueryOptions = <
-  TData = Awaited<ReturnType<typeof exportReconciliationCsvExportGet>>,
-  TError = AxiosError<HTTPValidationError>,
+export const getExportReconciliationCsvFinanceExportGetQueryKey = (
+  params?: ExportReconciliationCsvFinanceExportGetParams,
+) => {
+  return [`/finance/export`, ...(params ? [params] : [])] as const;
+};
+
+export const getExportReconciliationCsvFinanceExportGetQueryOptions = <
+  TData = Awaited<ReturnType<typeof exportReconciliationCsvFinanceExportGet>>,
+  TError = HTTPValidationError,
 >(
-  params: ExportReconciliationCsvExportGetParams,
+  params: ExportReconciliationCsvFinanceExportGetParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof exportReconciliationCsvExportGet>>,
+        Awaited<ReturnType<typeof exportReconciliationCsvFinanceExportGet>>,
         TError,
         TData
       >
     >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
 ) => {
-  const { query: queryOptions, axios: axiosOptions } = options ?? {};
+  const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey =
     queryOptions?.queryKey ??
-    getExportReconciliationCsvExportGetQueryKey(params);
+    getExportReconciliationCsvFinanceExportGetQueryKey(params);
 
   const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof exportReconciliationCsvExportGet>>
+    Awaited<ReturnType<typeof exportReconciliationCsvFinanceExportGet>>
   > = ({ signal }) =>
-    exportReconciliationCsvExportGet(params, { signal, ...axiosOptions });
+    exportReconciliationCsvFinanceExportGet(params, requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof exportReconciliationCsvExportGet>>,
+    Awaited<ReturnType<typeof exportReconciliationCsvFinanceExportGet>>,
     TError,
     TData
   > & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
-export type ExportReconciliationCsvExportGetQueryResult = NonNullable<
-  Awaited<ReturnType<typeof exportReconciliationCsvExportGet>>
+export type ExportReconciliationCsvFinanceExportGetQueryResult = NonNullable<
+  Awaited<ReturnType<typeof exportReconciliationCsvFinanceExportGet>>
 >;
-export type ExportReconciliationCsvExportGetQueryError =
-  AxiosError<HTTPValidationError>;
+export type ExportReconciliationCsvFinanceExportGetQueryError =
+  HTTPValidationError;
 
-export function useExportReconciliationCsvExportGet<
-  TData = Awaited<ReturnType<typeof exportReconciliationCsvExportGet>>,
-  TError = AxiosError<HTTPValidationError>,
+export function useExportReconciliationCsvFinanceExportGet<
+  TData = Awaited<ReturnType<typeof exportReconciliationCsvFinanceExportGet>>,
+  TError = HTTPValidationError,
 >(
-  params: ExportReconciliationCsvExportGetParams,
+  params: ExportReconciliationCsvFinanceExportGetParams,
   options: {
     query: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof exportReconciliationCsvExportGet>>,
+        Awaited<ReturnType<typeof exportReconciliationCsvFinanceExportGet>>,
         TError,
         TData
       >
     > &
       Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof exportReconciliationCsvExportGet>>,
+          Awaited<ReturnType<typeof exportReconciliationCsvFinanceExportGet>>,
           TError,
-          Awaited<ReturnType<typeof exportReconciliationCsvExportGet>>
+          Awaited<ReturnType<typeof exportReconciliationCsvFinanceExportGet>>
         >,
         "initialData"
       >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
-export function useExportReconciliationCsvExportGet<
-  TData = Awaited<ReturnType<typeof exportReconciliationCsvExportGet>>,
-  TError = AxiosError<HTTPValidationError>,
+export function useExportReconciliationCsvFinanceExportGet<
+  TData = Awaited<ReturnType<typeof exportReconciliationCsvFinanceExportGet>>,
+  TError = HTTPValidationError,
 >(
-  params: ExportReconciliationCsvExportGetParams,
+  params: ExportReconciliationCsvFinanceExportGetParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof exportReconciliationCsvExportGet>>,
+        Awaited<ReturnType<typeof exportReconciliationCsvFinanceExportGet>>,
         TError,
         TData
       >
     > &
       Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof exportReconciliationCsvExportGet>>,
+          Awaited<ReturnType<typeof exportReconciliationCsvFinanceExportGet>>,
           TError,
-          Awaited<ReturnType<typeof exportReconciliationCsvExportGet>>
+          Awaited<ReturnType<typeof exportReconciliationCsvFinanceExportGet>>
         >,
         "initialData"
       >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
-export function useExportReconciliationCsvExportGet<
-  TData = Awaited<ReturnType<typeof exportReconciliationCsvExportGet>>,
-  TError = AxiosError<HTTPValidationError>,
+export function useExportReconciliationCsvFinanceExportGet<
+  TData = Awaited<ReturnType<typeof exportReconciliationCsvFinanceExportGet>>,
+  TError = HTTPValidationError,
 >(
-  params: ExportReconciliationCsvExportGetParams,
+  params: ExportReconciliationCsvFinanceExportGetParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof exportReconciliationCsvExportGet>>,
+        Awaited<ReturnType<typeof exportReconciliationCsvFinanceExportGet>>,
         TError,
         TData
       >
     >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -340,26 +376,26 @@ export function useExportReconciliationCsvExportGet<
  * @summary Export Reconciliation Csv
  */
 
-export function useExportReconciliationCsvExportGet<
-  TData = Awaited<ReturnType<typeof exportReconciliationCsvExportGet>>,
-  TError = AxiosError<HTTPValidationError>,
+export function useExportReconciliationCsvFinanceExportGet<
+  TData = Awaited<ReturnType<typeof exportReconciliationCsvFinanceExportGet>>,
+  TError = HTTPValidationError,
 >(
-  params: ExportReconciliationCsvExportGetParams,
+  params: ExportReconciliationCsvFinanceExportGetParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof exportReconciliationCsvExportGet>>,
+        Awaited<ReturnType<typeof exportReconciliationCsvFinanceExportGet>>,
         TError,
         TData
       >
     >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
-  const queryOptions = getExportReconciliationCsvExportGetQueryOptions(
+  const queryOptions = getExportReconciliationCsvFinanceExportGetQueryOptions(
     params,
     options,
   );

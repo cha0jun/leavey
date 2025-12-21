@@ -2,8 +2,16 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 # Import the routers from the modules we created
+# Import the routers from the modules we created
 from app.routers import users, leaves, finance, audit, webhooks
 
+from dotenv import load_dotenv
+import os
+
+# Load .env file (if present)
+load_dotenv()
+
+from contextlib import asynccontextmanager
 from contextlib import asynccontextmanager
 from app.core.database import create_db_and_tables
 
@@ -41,10 +49,10 @@ app.add_middleware(
 # The 'tags' argument is super important! 
 # Orval uses these tags to name your React Hooks folders/files.
 
-app.include_router(users.router, tags=["Users"])
-app.include_router(leaves.router, tags=["Leaves"])
-app.include_router(finance.router, tags=["Finance"])
-app.include_router(audit.router, tags=["Audit"])
+app.include_router(users.router, prefix="/users", tags=["Users"])
+app.include_router(leaves.router, prefix="/leaves", tags=["Leaves"])
+app.include_router(finance.router, prefix="/finance", tags=["Finance"])
+app.include_router(audit.router, prefix="/audit", tags=["Audit"])
 
 # --- 3. HEALTH CHECK ---
 # Always have a simple root endpoint to verify the server is breathing.

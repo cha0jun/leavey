@@ -18,16 +18,21 @@ import type {
   UseQueryResult,
 } from "@tanstack/react-query";
 
-import axios from "axios";
-import type { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
+import { customInstance } from ".././axios-instance";
+
+type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 /**
  * @summary Health Check
  */
 export const healthCheckHealthGet = (
-  options?: AxiosRequestConfig,
-): Promise<AxiosResponse<unknown>> => {
-  return axios.get(`/health`, options);
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<unknown>(
+    { url: `/health`, method: "GET", signal },
+    options,
+  );
 };
 
 export const getHealthCheckHealthGetQueryKey = () => {
@@ -36,7 +41,7 @@ export const getHealthCheckHealthGetQueryKey = () => {
 
 export const getHealthCheckHealthGetQueryOptions = <
   TData = Awaited<ReturnType<typeof healthCheckHealthGet>>,
-  TError = AxiosError<unknown>,
+  TError = unknown,
 >(options?: {
   query?: Partial<
     UseQueryOptions<
@@ -45,15 +50,15 @@ export const getHealthCheckHealthGetQueryOptions = <
       TData
     >
   >;
-  axios?: AxiosRequestConfig;
+  request?: SecondParameter<typeof customInstance>;
 }) => {
-  const { query: queryOptions, axios: axiosOptions } = options ?? {};
+  const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey = queryOptions?.queryKey ?? getHealthCheckHealthGetQueryKey();
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof healthCheckHealthGet>>
-  > = ({ signal }) => healthCheckHealthGet({ signal, ...axiosOptions });
+  > = ({ signal }) => healthCheckHealthGet(requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof healthCheckHealthGet>>,
@@ -65,11 +70,11 @@ export const getHealthCheckHealthGetQueryOptions = <
 export type HealthCheckHealthGetQueryResult = NonNullable<
   Awaited<ReturnType<typeof healthCheckHealthGet>>
 >;
-export type HealthCheckHealthGetQueryError = AxiosError<unknown>;
+export type HealthCheckHealthGetQueryError = unknown;
 
 export function useHealthCheckHealthGet<
   TData = Awaited<ReturnType<typeof healthCheckHealthGet>>,
-  TError = AxiosError<unknown>,
+  TError = unknown,
 >(
   options: {
     query: Partial<
@@ -87,7 +92,7 @@ export function useHealthCheckHealthGet<
         >,
         "initialData"
       >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & {
@@ -95,7 +100,7 @@ export function useHealthCheckHealthGet<
 };
 export function useHealthCheckHealthGet<
   TData = Awaited<ReturnType<typeof healthCheckHealthGet>>,
-  TError = AxiosError<unknown>,
+  TError = unknown,
 >(
   options?: {
     query?: Partial<
@@ -113,7 +118,7 @@ export function useHealthCheckHealthGet<
         >,
         "initialData"
       >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -121,7 +126,7 @@ export function useHealthCheckHealthGet<
 };
 export function useHealthCheckHealthGet<
   TData = Awaited<ReturnType<typeof healthCheckHealthGet>>,
-  TError = AxiosError<unknown>,
+  TError = unknown,
 >(
   options?: {
     query?: Partial<
@@ -131,7 +136,7 @@ export function useHealthCheckHealthGet<
         TData
       >
     >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -143,7 +148,7 @@ export function useHealthCheckHealthGet<
 
 export function useHealthCheckHealthGet<
   TData = Awaited<ReturnType<typeof healthCheckHealthGet>>,
-  TError = AxiosError<unknown>,
+  TError = unknown,
 >(
   options?: {
     query?: Partial<
@@ -153,7 +158,7 @@ export function useHealthCheckHealthGet<
         TData
       >
     >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {

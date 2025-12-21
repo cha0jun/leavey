@@ -15,6 +15,8 @@ export interface AuditLogActorRead {
   role: UserRole;
 }
 
+export type AuditLogReadLeaveRequestId = number | null;
+
 export type AuditLogReadFieldChanged = string | null;
 
 export type AuditLogReadOldValue = string | null;
@@ -27,13 +29,23 @@ We nest the 'actor' so the UI can display names immediately.
  */
 export interface AuditLogRead {
   id: number;
-  leave_request_id: number;
+  leave_request_id: AuditLogReadLeaveRequestId;
   action: string;
   field_changed: AuditLogReadFieldChanged;
   old_value: AuditLogReadOldValue;
   new_value: AuditLogReadNewValue;
   timestamp: string;
   actor: AuditLogActorRead;
+}
+
+export interface BodyUploadDocumentLeavesLeaveIdUploadPost {
+  file: Blob;
+}
+
+export interface DocumentRead {
+  id: number;
+  filename: string;
+  created_at: string;
 }
 
 export type FinanceReportRowVendorId = number | null;
@@ -62,17 +74,10 @@ export interface HTTPValidationError {
   detail?: ValidationError[];
 }
 
-export type LeaveCategoryId = number | null;
-
-/**
- * Configuration table. Changing 'is_chargeable' here affects FUTURE requests,
-but not historical ones (due to snapshotting in LeaveRequest).
- */
-export interface LeaveCategory {
-  id?: LeaveCategoryId;
+export interface LeaveCategoryReadDTO {
+  id: number;
   name: string;
-  /** If True, Government pays Vendor for this day */
-  is_chargeable?: boolean;
+  is_chargeable: boolean;
 }
 
 export type LeaveRequestCreateAttachmentUrl = string | null;
@@ -95,9 +100,9 @@ export type LeaveRequestReadAttachmentUrl = string | null;
 
 export type LeaveRequestReadApprovedAt = string | null;
 
-export type LeaveRequestReadCategory = LeaveCategory | null;
+export type LeaveRequestReadCategory = LeaveCategoryReadDTO | null;
 
-export type LeaveRequestReadUser = User | null;
+export type LeaveRequestReadUser = UserReadDTO | null;
 
 /**
  * Output: Includes nested Category and User details for the UI.
@@ -117,6 +122,7 @@ export interface LeaveRequestRead {
   approved_at?: LeaveRequestReadApprovedAt;
   category?: LeaveRequestReadCategory;
   user?: LeaveRequestReadUser;
+  documents?: DocumentRead[];
 }
 
 export type LeaveRequestUpdateStartDate = string | null;
@@ -126,6 +132,8 @@ export type LeaveRequestUpdateEndDate = string | null;
 export type LeaveRequestUpdateTotalDays = number | null;
 
 export type LeaveRequestUpdateReason = string | null;
+
+export type LeaveRequestUpdateCategoryId = number | null;
 
 export type LeaveRequestUpdateAttachmentUrl = string | null;
 
@@ -137,6 +145,7 @@ export interface LeaveRequestUpdate {
   end_date?: LeaveRequestUpdateEndDate;
   total_days?: LeaveRequestUpdateTotalDays;
   reason?: LeaveRequestUpdateReason;
+  category_id?: LeaveRequestUpdateCategoryId;
   attachment_url?: LeaveRequestUpdateAttachmentUrl;
 }
 
@@ -150,29 +159,11 @@ export const LeaveStatus = {
   CANCELLED: "CANCELLED",
 } as const;
 
-export type UserId = number | null;
-
-/**
- * Vendor Company ID for billing grouping
- */
-export type UserVendorId = number | null;
-
-/**
- * Shadow User Table. 
-'clerk_id' maps to the Authentication provider.
-'id' is used for internal database foreign keys (Performance).
- */
-export interface User {
-  id?: UserId;
-  clerk_id: string;
-  email: string;
-  full_name: string;
-  role?: UserRole;
-  /** Vendor Company ID for billing grouping */
-  vendor_id?: UserVendorId;
-}
-
 export type UserReadVendorId = number | null;
+
+export type UserReadDepartment = string | null;
+
+export type UserReadManagerId = number | null;
 
 /**
  * Public User profile
@@ -184,6 +175,16 @@ export interface UserRead {
   full_name: string;
   role: UserRole;
   vendor_id?: UserReadVendorId;
+  department?: UserReadDepartment;
+  manager_id?: UserReadManagerId;
+  is_active: boolean;
+}
+
+export interface UserReadDTO {
+  id: number;
+  email: string;
+  full_name: string;
+  role: UserRole;
 }
 
 export type UserRole = (typeof UserRole)[keyof typeof UserRole];
@@ -201,6 +202,10 @@ export type UserUpdateAdminVendorId = number | null;
 
 export type UserUpdateAdminFullName = string | null;
 
+export type UserUpdateAdminDepartment = string | null;
+
+export type UserUpdateAdminManagerId = number | null;
+
 export type UserUpdateAdminIsActive = boolean | null;
 
 /**
@@ -210,6 +215,8 @@ export interface UserUpdateAdmin {
   role?: UserUpdateAdminRole;
   vendor_id?: UserUpdateAdminVendorId;
   full_name?: UserUpdateAdminFullName;
+  department?: UserUpdateAdminDepartment;
+  manager_id?: UserUpdateAdminManagerId;
   is_active?: UserUpdateAdminIsActive;
 }
 
@@ -230,21 +237,36 @@ export interface ValidationError {
   type: string;
 }
 
-export type GetAllAuditLogsGetParams = {
+export type ListUsersUsersGetParams = {
   offset?: number;
   /**
    * @maximum 100
    */
   limit?: number;
-  user_id?: number | null;
-  leave_id?: number | null;
+  role?: UserRole | null;
 };
 
-export type ProcessLeaveStatusLeaveIdProcessPostParams = {
+export type ListLeavesLeavesGetParams = {
+  offset?: number;
+  /**
+   * @maximum 100
+   */
+  limit?: number;
+  status?: LeaveStatus | null;
+  user_id?: number | null;
+  /**
+   * Only fetch personal leaves
+   */
+  mine?: boolean | null;
+  department?: string | null;
+  manager_id?: number | null;
+};
+
+export type ProcessLeaveStatusLeavesLeaveIdProcessPostParams = {
   status: LeaveStatus;
 };
 
-export type GetMonthlyReconciliationReconciliationGetParams = {
+export type GetMonthlyReconciliationFinanceReconciliationGetParams = {
   year: number;
   month: number;
   /**
@@ -253,8 +275,18 @@ export type GetMonthlyReconciliationReconciliationGetParams = {
   working_days?: number;
 };
 
-export type ExportReconciliationCsvExportGetParams = {
+export type ExportReconciliationCsvFinanceExportGetParams = {
   year: number;
   month: number;
   working_days?: number;
+};
+
+export type GetAllAuditLogsAuditGetParams = {
+  offset?: number;
+  /**
+   * @maximum 100
+   */
+  limit?: number;
+  user_id?: number | null;
+  leave_id?: number | null;
 };

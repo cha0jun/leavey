@@ -20,3 +20,24 @@ def create_db_and_tables():
     # Import models here so SQLModel knows about them
     from app import models
     SQLModel.metadata.create_all(engine)
+    
+    # SEED DEFAULT DATA
+    from sqlmodel import select
+    from app.models import LeaveCategory
+    
+    with Session(engine) as session:
+        # Check if categories exist
+        statement = select(LeaveCategory)
+        results = session.exec(statement).first()
+        
+        if not results:
+            print("Running Seed: Creating Default Leave Categories...")
+            defaults = [
+                LeaveCategory(id=1, name="Medical", is_chargeable=True),
+                LeaveCategory(id=2, name="Annual", is_chargeable=True),
+                LeaveCategory(id=3, name="Unpaid", is_chargeable=False),
+            ]
+            for cat in defaults:
+                session.add(cat)
+            session.commit()
+            print("Seed complete.")

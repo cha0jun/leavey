@@ -29,6 +29,7 @@ class AuditAction(str, Enum):
     CREATE = "CREATE"
     UPDATE = "UPDATE"
     DELETE = "DELETE"
+    UPDATE_USER = "UPDATE_USER"
 
 # --- MODELS ---
 
@@ -44,6 +45,9 @@ class User(SQLModel, table=True):
     full_name: str
     role: UserRole = Field(default=UserRole.CONTRACTOR)
     vendor_id: Optional[int] = Field(default=None, description="Vendor Company ID for billing grouping")
+    department: Optional[str] = Field(default=None, index=True)
+    manager_id: Optional[int] = Field(default=None, foreign_key="user.id")
+    is_active: bool = Field(default=True)
     
     # Relationships
     leave_requests: List["LeaveRequest"] = Relationship(back_populates="user")
@@ -101,6 +105,7 @@ class LeaveRequest(SQLModel, table=True):
     user: User = Relationship(back_populates="leave_requests")
     category: LeaveCategory = Relationship(back_populates="leave_requests")
     audit_logs: List["AuditLog"] = Relationship(back_populates="leave_request")
+    documents: List["Document"] = Relationship(back_populates="leave_request")
 
 
 class AuditLog(SQLModel, table=True):
@@ -112,7 +117,7 @@ class AuditLog(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     
     # Foreign Keys
-    leave_request_id: int = Field(foreign_key="leave_request.id")
+    leave_request_id: Optional[int] = Field(default=None, foreign_key="leave_request.id", nullable=True)
     actor_user_id: int = Field(foreign_key="user.id", description="Who made the change")
 
     # Change Details
@@ -126,3 +131,25 @@ class AuditLog(SQLModel, table=True):
     # Relationships
     leave_request: LeaveRequest = Relationship(back_populates="audit_logs")
     actor: User = Relationship(back_populates="audit_logs")
+
+
+class Document(SQLModel, table=True):
+    """
+    Stores metadata for uploaded files linked to a leave request.
+    Files are stored in the persistent volume.
+    """
+    __tablename__ = "document"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    
+    # Foreign Keys
+    leave_request_id: int = Field(foreign_key="leave_request.id")
+    
+    filename: str = Field(description="Original filename or UUID-based name")
+    file_path: str = Field(description="Path on disk inside the container")
+    
+    # Meta
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+    # Relationships
+    leave_request: LeaveRequest = Relationship(back_populates="documents")

@@ -3,7 +3,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlmodel import Session, select
 from app.core.database import get_session
 from app.core.security import get_current_user
-from app.models import User, UserRole
+from app.models import User, UserRole, AuditAction
+from app.routers.audit import create_audit_log
 
 router = APIRouter()
 
@@ -21,6 +22,9 @@ class UserRead(SQLModel):
     full_name: str
     role: UserRole
     vendor_id: Optional[int] = None
+    department: Optional[str] = None
+    manager_id: Optional[int] = None
+    is_active: bool
 
 class UserUpdateSelf(SQLModel):
     """Fields a user can update about themselves"""
@@ -32,6 +36,8 @@ class UserUpdateAdmin(SQLModel):
     role: Optional[UserRole] = None
     vendor_id: Optional[int] = None
     full_name: Optional[str] = None
+    department: Optional[str] = None
+    manager_id: Optional[int] = None
     is_active: Optional[bool] = None
 
 # --- ENDPOINTS ---
@@ -118,7 +124,18 @@ async def update_user_details(
     user_data = user_update.model_dump(exclude_unset=True)
     
     for key, value in user_data.items():
-        setattr(user_db, key, value)
+        old_val = getattr(user_db, key)
+        if old_val != value:
+            create_audit_log(
+                session=session,
+                leave_request_id=None,
+                actor_user_id=current_user.id,
+                action=AuditAction.UPDATE_USER,
+                field_changed=key,
+                old_value=old_val,
+                new_value=value
+            )
+            setattr(user_db, key, value)
 
     session.add(user_db)
     session.commit()

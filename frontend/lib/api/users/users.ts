@@ -21,128 +21,134 @@ import type {
   UseQueryResult,
 } from "@tanstack/react-query";
 
-import axios from "axios";
-import type { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
-
 import type {
   HTTPValidationError,
+  ListUsersUsersGetParams,
   UserRead,
   UserUpdateAdmin,
   UserUpdateSelf,
 } from "../index.schemas";
 
+import { customInstance } from ".././axios-instance";
+
+type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
+
 /**
  * @summary Get Current User Profile
  */
-export const getCurrentUserProfileMeGet = (
-  options?: AxiosRequestConfig,
-): Promise<AxiosResponse<UserRead>> => {
-  return axios.get(`/me`, options);
+export const getCurrentUserProfileUsersMeGet = (
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<UserRead>(
+    { url: `/users/me`, method: "GET", signal },
+    options,
+  );
 };
 
-export const getGetCurrentUserProfileMeGetQueryKey = () => {
-  return [`/me`] as const;
+export const getGetCurrentUserProfileUsersMeGetQueryKey = () => {
+  return [`/users/me`] as const;
 };
 
-export const getGetCurrentUserProfileMeGetQueryOptions = <
-  TData = Awaited<ReturnType<typeof getCurrentUserProfileMeGet>>,
-  TError = AxiosError<unknown>,
+export const getGetCurrentUserProfileUsersMeGetQueryOptions = <
+  TData = Awaited<ReturnType<typeof getCurrentUserProfileUsersMeGet>>,
+  TError = unknown,
 >(options?: {
   query?: Partial<
     UseQueryOptions<
-      Awaited<ReturnType<typeof getCurrentUserProfileMeGet>>,
+      Awaited<ReturnType<typeof getCurrentUserProfileUsersMeGet>>,
       TError,
       TData
     >
   >;
-  axios?: AxiosRequestConfig;
+  request?: SecondParameter<typeof customInstance>;
 }) => {
-  const { query: queryOptions, axios: axiosOptions } = options ?? {};
+  const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey =
-    queryOptions?.queryKey ?? getGetCurrentUserProfileMeGetQueryKey();
+    queryOptions?.queryKey ?? getGetCurrentUserProfileUsersMeGetQueryKey();
 
   const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof getCurrentUserProfileMeGet>>
-  > = ({ signal }) => getCurrentUserProfileMeGet({ signal, ...axiosOptions });
+    Awaited<ReturnType<typeof getCurrentUserProfileUsersMeGet>>
+  > = ({ signal }) => getCurrentUserProfileUsersMeGet(requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof getCurrentUserProfileMeGet>>,
+    Awaited<ReturnType<typeof getCurrentUserProfileUsersMeGet>>,
     TError,
     TData
   > & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
-export type GetCurrentUserProfileMeGetQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getCurrentUserProfileMeGet>>
+export type GetCurrentUserProfileUsersMeGetQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getCurrentUserProfileUsersMeGet>>
 >;
-export type GetCurrentUserProfileMeGetQueryError = AxiosError<unknown>;
+export type GetCurrentUserProfileUsersMeGetQueryError = unknown;
 
-export function useGetCurrentUserProfileMeGet<
-  TData = Awaited<ReturnType<typeof getCurrentUserProfileMeGet>>,
-  TError = AxiosError<unknown>,
+export function useGetCurrentUserProfileUsersMeGet<
+  TData = Awaited<ReturnType<typeof getCurrentUserProfileUsersMeGet>>,
+  TError = unknown,
 >(
   options: {
     query: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getCurrentUserProfileMeGet>>,
+        Awaited<ReturnType<typeof getCurrentUserProfileUsersMeGet>>,
         TError,
         TData
       >
     > &
       Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getCurrentUserProfileMeGet>>,
+          Awaited<ReturnType<typeof getCurrentUserProfileUsersMeGet>>,
           TError,
-          Awaited<ReturnType<typeof getCurrentUserProfileMeGet>>
+          Awaited<ReturnType<typeof getCurrentUserProfileUsersMeGet>>
         >,
         "initialData"
       >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
-export function useGetCurrentUserProfileMeGet<
-  TData = Awaited<ReturnType<typeof getCurrentUserProfileMeGet>>,
-  TError = AxiosError<unknown>,
+export function useGetCurrentUserProfileUsersMeGet<
+  TData = Awaited<ReturnType<typeof getCurrentUserProfileUsersMeGet>>,
+  TError = unknown,
 >(
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getCurrentUserProfileMeGet>>,
+        Awaited<ReturnType<typeof getCurrentUserProfileUsersMeGet>>,
         TError,
         TData
       >
     > &
       Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getCurrentUserProfileMeGet>>,
+          Awaited<ReturnType<typeof getCurrentUserProfileUsersMeGet>>,
           TError,
-          Awaited<ReturnType<typeof getCurrentUserProfileMeGet>>
+          Awaited<ReturnType<typeof getCurrentUserProfileUsersMeGet>>
         >,
         "initialData"
       >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
-export function useGetCurrentUserProfileMeGet<
-  TData = Awaited<ReturnType<typeof getCurrentUserProfileMeGet>>,
-  TError = AxiosError<unknown>,
+export function useGetCurrentUserProfileUsersMeGet<
+  TData = Awaited<ReturnType<typeof getCurrentUserProfileUsersMeGet>>,
+  TError = unknown,
 >(
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getCurrentUserProfileMeGet>>,
+        Awaited<ReturnType<typeof getCurrentUserProfileUsersMeGet>>,
         TError,
         TData
       >
     >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -152,25 +158,25 @@ export function useGetCurrentUserProfileMeGet<
  * @summary Get Current User Profile
  */
 
-export function useGetCurrentUserProfileMeGet<
-  TData = Awaited<ReturnType<typeof getCurrentUserProfileMeGet>>,
-  TError = AxiosError<unknown>,
+export function useGetCurrentUserProfileUsersMeGet<
+  TData = Awaited<ReturnType<typeof getCurrentUserProfileUsersMeGet>>,
+  TError = unknown,
 >(
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getCurrentUserProfileMeGet>>,
+        Awaited<ReturnType<typeof getCurrentUserProfileUsersMeGet>>,
         TError,
         TData
       >
     >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
-  const queryOptions = getGetCurrentUserProfileMeGetQueryOptions(options);
+  const queryOptions = getGetCurrentUserProfileUsersMeGetQueryOptions(options);
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
     TData,
@@ -185,124 +191,301 @@ export function useGetCurrentUserProfileMeGet<
 /**
  * @summary Update Current User Profile
  */
-export const updateCurrentUserProfileMePatch = (
+export const updateCurrentUserProfileUsersMePatch = (
   userUpdateSelf: UserUpdateSelf,
-  options?: AxiosRequestConfig,
-): Promise<AxiosResponse<UserRead>> => {
-  return axios.patch(`/me`, userUpdateSelf, options);
+  options?: SecondParameter<typeof customInstance>,
+) => {
+  return customInstance<UserRead>(
+    {
+      url: `/users/me`,
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      data: userUpdateSelf,
+    },
+    options,
+  );
 };
 
-export const getUpdateCurrentUserProfileMePatchMutationOptions = <
-  TError = AxiosError<HTTPValidationError>,
+export const getUpdateCurrentUserProfileUsersMePatchMutationOptions = <
+  TError = HTTPValidationError,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof updateCurrentUserProfileMePatch>>,
+    Awaited<ReturnType<typeof updateCurrentUserProfileUsersMePatch>>,
     TError,
     { data: UserUpdateSelf },
     TContext
   >;
-  axios?: AxiosRequestConfig;
+  request?: SecondParameter<typeof customInstance>;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof updateCurrentUserProfileMePatch>>,
+  Awaited<ReturnType<typeof updateCurrentUserProfileUsersMePatch>>,
   TError,
   { data: UserUpdateSelf },
   TContext
 > => {
-  const mutationKey = ["updateCurrentUserProfileMePatch"];
-  const { mutation: mutationOptions, axios: axiosOptions } = options
+  const mutationKey = ["updateCurrentUserProfileUsersMePatch"];
+  const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
       options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, axios: undefined };
+    : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof updateCurrentUserProfileMePatch>>,
+    Awaited<ReturnType<typeof updateCurrentUserProfileUsersMePatch>>,
     { data: UserUpdateSelf }
   > = (props) => {
     const { data } = props ?? {};
 
-    return updateCurrentUserProfileMePatch(data, axiosOptions);
+    return updateCurrentUserProfileUsersMePatch(data, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type UpdateCurrentUserProfileMePatchMutationResult = NonNullable<
-  Awaited<ReturnType<typeof updateCurrentUserProfileMePatch>>
+export type UpdateCurrentUserProfileUsersMePatchMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateCurrentUserProfileUsersMePatch>>
 >;
-export type UpdateCurrentUserProfileMePatchMutationBody = UserUpdateSelf;
-export type UpdateCurrentUserProfileMePatchMutationError =
-  AxiosError<HTTPValidationError>;
+export type UpdateCurrentUserProfileUsersMePatchMutationBody = UserUpdateSelf;
+export type UpdateCurrentUserProfileUsersMePatchMutationError =
+  HTTPValidationError;
 
 /**
  * @summary Update Current User Profile
  */
-export const useUpdateCurrentUserProfileMePatch = <
-  TError = AxiosError<HTTPValidationError>,
+export const useUpdateCurrentUserProfileUsersMePatch = <
+  TError = HTTPValidationError,
   TContext = unknown,
 >(
   options?: {
     mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof updateCurrentUserProfileMePatch>>,
+      Awaited<ReturnType<typeof updateCurrentUserProfileUsersMePatch>>,
       TError,
       { data: UserUpdateSelf },
       TContext
     >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseMutationResult<
-  Awaited<ReturnType<typeof updateCurrentUserProfileMePatch>>,
+  Awaited<ReturnType<typeof updateCurrentUserProfileUsersMePatch>>,
   TError,
   { data: UserUpdateSelf },
   TContext
 > => {
   const mutationOptions =
-    getUpdateCurrentUserProfileMePatchMutationOptions(options);
+    getUpdateCurrentUserProfileUsersMePatchMutationOptions(options);
 
   return useMutation(mutationOptions, queryClient);
 };
 /**
+ * @summary List Users
+ */
+export const listUsersUsersGet = (
+  params?: ListUsersUsersGetParams,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<UserRead[]>(
+    { url: `/users/`, method: "GET", params, signal },
+    options,
+  );
+};
+
+export const getListUsersUsersGetQueryKey = (
+  params?: ListUsersUsersGetParams,
+) => {
+  return [`/users/`, ...(params ? [params] : [])] as const;
+};
+
+export const getListUsersUsersGetQueryOptions = <
+  TData = Awaited<ReturnType<typeof listUsersUsersGet>>,
+  TError = HTTPValidationError,
+>(
+  params?: ListUsersUsersGetParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof listUsersUsersGet>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getListUsersUsersGetQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof listUsersUsersGet>>
+  > = ({ signal }) => listUsersUsersGet(params, requestOptions, signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listUsersUsersGet>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type ListUsersUsersGetQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listUsersUsersGet>>
+>;
+export type ListUsersUsersGetQueryError = HTTPValidationError;
+
+export function useListUsersUsersGet<
+  TData = Awaited<ReturnType<typeof listUsersUsersGet>>,
+  TError = HTTPValidationError,
+>(
+  params: undefined | ListUsersUsersGetParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof listUsersUsersGet>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listUsersUsersGet>>,
+          TError,
+          Awaited<ReturnType<typeof listUsersUsersGet>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useListUsersUsersGet<
+  TData = Awaited<ReturnType<typeof listUsersUsersGet>>,
+  TError = HTTPValidationError,
+>(
+  params?: ListUsersUsersGetParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof listUsersUsersGet>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listUsersUsersGet>>,
+          TError,
+          Awaited<ReturnType<typeof listUsersUsersGet>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useListUsersUsersGet<
+  TData = Awaited<ReturnType<typeof listUsersUsersGet>>,
+  TError = HTTPValidationError,
+>(
+  params?: ListUsersUsersGetParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof listUsersUsersGet>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary List Users
+ */
+
+export function useListUsersUsersGet<
+  TData = Awaited<ReturnType<typeof listUsersUsersGet>>,
+  TError = HTTPValidationError,
+>(
+  params?: ListUsersUsersGetParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof listUsersUsersGet>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getListUsersUsersGetQueryOptions(params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+/**
  * @summary Get User By Id
  */
-export const getUserByIdUserIdGet = (
+export const getUserByIdUsersUserIdGet = (
   userId: number,
-  options?: AxiosRequestConfig,
-): Promise<AxiosResponse<UserRead>> => {
-  return axios.get(`/${userId}`, options);
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<UserRead>(
+    { url: `/users/${userId}`, method: "GET", signal },
+    options,
+  );
 };
 
-export const getGetUserByIdUserIdGetQueryKey = (userId?: number) => {
-  return [`/${userId}`] as const;
+export const getGetUserByIdUsersUserIdGetQueryKey = (userId?: number) => {
+  return [`/users/${userId}`] as const;
 };
 
-export const getGetUserByIdUserIdGetQueryOptions = <
-  TData = Awaited<ReturnType<typeof getUserByIdUserIdGet>>,
-  TError = AxiosError<HTTPValidationError>,
+export const getGetUserByIdUsersUserIdGetQueryOptions = <
+  TData = Awaited<ReturnType<typeof getUserByIdUsersUserIdGet>>,
+  TError = HTTPValidationError,
 >(
   userId: number,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getUserByIdUserIdGet>>,
+        Awaited<ReturnType<typeof getUserByIdUsersUserIdGet>>,
         TError,
         TData
       >
     >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
 ) => {
-  const { query: queryOptions, axios: axiosOptions } = options ?? {};
+  const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey =
-    queryOptions?.queryKey ?? getGetUserByIdUserIdGetQueryKey(userId);
+    queryOptions?.queryKey ?? getGetUserByIdUsersUserIdGetQueryKey(userId);
 
   const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof getUserByIdUserIdGet>>
-  > = ({ signal }) => getUserByIdUserIdGet(userId, { signal, ...axiosOptions });
+    Awaited<ReturnType<typeof getUserByIdUsersUserIdGet>>
+  > = ({ signal }) => getUserByIdUsersUserIdGet(userId, requestOptions, signal);
 
   return {
     queryKey,
@@ -310,85 +493,85 @@ export const getGetUserByIdUserIdGetQueryOptions = <
     enabled: !!userId,
     ...queryOptions,
   } as UseQueryOptions<
-    Awaited<ReturnType<typeof getUserByIdUserIdGet>>,
+    Awaited<ReturnType<typeof getUserByIdUsersUserIdGet>>,
     TError,
     TData
   > & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
-export type GetUserByIdUserIdGetQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getUserByIdUserIdGet>>
+export type GetUserByIdUsersUserIdGetQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getUserByIdUsersUserIdGet>>
 >;
-export type GetUserByIdUserIdGetQueryError = AxiosError<HTTPValidationError>;
+export type GetUserByIdUsersUserIdGetQueryError = HTTPValidationError;
 
-export function useGetUserByIdUserIdGet<
-  TData = Awaited<ReturnType<typeof getUserByIdUserIdGet>>,
-  TError = AxiosError<HTTPValidationError>,
+export function useGetUserByIdUsersUserIdGet<
+  TData = Awaited<ReturnType<typeof getUserByIdUsersUserIdGet>>,
+  TError = HTTPValidationError,
 >(
   userId: number,
   options: {
     query: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getUserByIdUserIdGet>>,
+        Awaited<ReturnType<typeof getUserByIdUsersUserIdGet>>,
         TError,
         TData
       >
     > &
       Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getUserByIdUserIdGet>>,
+          Awaited<ReturnType<typeof getUserByIdUsersUserIdGet>>,
           TError,
-          Awaited<ReturnType<typeof getUserByIdUserIdGet>>
+          Awaited<ReturnType<typeof getUserByIdUsersUserIdGet>>
         >,
         "initialData"
       >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
-export function useGetUserByIdUserIdGet<
-  TData = Awaited<ReturnType<typeof getUserByIdUserIdGet>>,
-  TError = AxiosError<HTTPValidationError>,
+export function useGetUserByIdUsersUserIdGet<
+  TData = Awaited<ReturnType<typeof getUserByIdUsersUserIdGet>>,
+  TError = HTTPValidationError,
 >(
   userId: number,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getUserByIdUserIdGet>>,
+        Awaited<ReturnType<typeof getUserByIdUsersUserIdGet>>,
         TError,
         TData
       >
     > &
       Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getUserByIdUserIdGet>>,
+          Awaited<ReturnType<typeof getUserByIdUsersUserIdGet>>,
           TError,
-          Awaited<ReturnType<typeof getUserByIdUserIdGet>>
+          Awaited<ReturnType<typeof getUserByIdUsersUserIdGet>>
         >,
         "initialData"
       >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
-export function useGetUserByIdUserIdGet<
-  TData = Awaited<ReturnType<typeof getUserByIdUserIdGet>>,
-  TError = AxiosError<HTTPValidationError>,
+export function useGetUserByIdUsersUserIdGet<
+  TData = Awaited<ReturnType<typeof getUserByIdUsersUserIdGet>>,
+  TError = HTTPValidationError,
 >(
   userId: number,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getUserByIdUserIdGet>>,
+        Awaited<ReturnType<typeof getUserByIdUsersUserIdGet>>,
         TError,
         TData
       >
     >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
@@ -398,26 +581,29 @@ export function useGetUserByIdUserIdGet<
  * @summary Get User By Id
  */
 
-export function useGetUserByIdUserIdGet<
-  TData = Awaited<ReturnType<typeof getUserByIdUserIdGet>>,
-  TError = AxiosError<HTTPValidationError>,
+export function useGetUserByIdUsersUserIdGet<
+  TData = Awaited<ReturnType<typeof getUserByIdUsersUserIdGet>>,
+  TError = HTTPValidationError,
 >(
   userId: number,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getUserByIdUserIdGet>>,
+        Awaited<ReturnType<typeof getUserByIdUsersUserIdGet>>,
         TError,
         TData
       >
     >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
-  const queryOptions = getGetUserByIdUserIdGetQueryOptions(userId, options);
+  const queryOptions = getGetUserByIdUsersUserIdGetQueryOptions(
+    userId,
+    options,
+  );
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
     TData,
@@ -432,84 +618,92 @@ export function useGetUserByIdUserIdGet<
 /**
  * @summary Update User Details
  */
-export const updateUserDetailsUserIdPatch = (
+export const updateUserDetailsUsersUserIdPatch = (
   userId: number,
   userUpdateAdmin: UserUpdateAdmin,
-  options?: AxiosRequestConfig,
-): Promise<AxiosResponse<UserRead>> => {
-  return axios.patch(`/${userId}`, userUpdateAdmin, options);
+  options?: SecondParameter<typeof customInstance>,
+) => {
+  return customInstance<UserRead>(
+    {
+      url: `/users/${userId}`,
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      data: userUpdateAdmin,
+    },
+    options,
+  );
 };
 
-export const getUpdateUserDetailsUserIdPatchMutationOptions = <
-  TError = AxiosError<HTTPValidationError>,
+export const getUpdateUserDetailsUsersUserIdPatchMutationOptions = <
+  TError = HTTPValidationError,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof updateUserDetailsUserIdPatch>>,
+    Awaited<ReturnType<typeof updateUserDetailsUsersUserIdPatch>>,
     TError,
     { userId: number; data: UserUpdateAdmin },
     TContext
   >;
-  axios?: AxiosRequestConfig;
+  request?: SecondParameter<typeof customInstance>;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof updateUserDetailsUserIdPatch>>,
+  Awaited<ReturnType<typeof updateUserDetailsUsersUserIdPatch>>,
   TError,
   { userId: number; data: UserUpdateAdmin },
   TContext
 > => {
-  const mutationKey = ["updateUserDetailsUserIdPatch"];
-  const { mutation: mutationOptions, axios: axiosOptions } = options
+  const mutationKey = ["updateUserDetailsUsersUserIdPatch"];
+  const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
       options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, axios: undefined };
+    : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof updateUserDetailsUserIdPatch>>,
+    Awaited<ReturnType<typeof updateUserDetailsUsersUserIdPatch>>,
     { userId: number; data: UserUpdateAdmin }
   > = (props) => {
     const { userId, data } = props ?? {};
 
-    return updateUserDetailsUserIdPatch(userId, data, axiosOptions);
+    return updateUserDetailsUsersUserIdPatch(userId, data, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type UpdateUserDetailsUserIdPatchMutationResult = NonNullable<
-  Awaited<ReturnType<typeof updateUserDetailsUserIdPatch>>
+export type UpdateUserDetailsUsersUserIdPatchMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateUserDetailsUsersUserIdPatch>>
 >;
-export type UpdateUserDetailsUserIdPatchMutationBody = UserUpdateAdmin;
-export type UpdateUserDetailsUserIdPatchMutationError =
-  AxiosError<HTTPValidationError>;
+export type UpdateUserDetailsUsersUserIdPatchMutationBody = UserUpdateAdmin;
+export type UpdateUserDetailsUsersUserIdPatchMutationError =
+  HTTPValidationError;
 
 /**
  * @summary Update User Details
  */
-export const useUpdateUserDetailsUserIdPatch = <
-  TError = AxiosError<HTTPValidationError>,
+export const useUpdateUserDetailsUsersUserIdPatch = <
+  TError = HTTPValidationError,
   TContext = unknown,
 >(
   options?: {
     mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof updateUserDetailsUserIdPatch>>,
+      Awaited<ReturnType<typeof updateUserDetailsUsersUserIdPatch>>,
       TError,
       { userId: number; data: UserUpdateAdmin },
       TContext
     >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseMutationResult<
-  Awaited<ReturnType<typeof updateUserDetailsUserIdPatch>>,
+  Awaited<ReturnType<typeof updateUserDetailsUsersUserIdPatch>>,
   TError,
   { userId: number; data: UserUpdateAdmin },
   TContext
 > => {
   const mutationOptions =
-    getUpdateUserDetailsUserIdPatchMutationOptions(options);
+    getUpdateUserDetailsUsersUserIdPatchMutationOptions(options);
 
   return useMutation(mutationOptions, queryClient);
 };

@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 interface ActivityItemProps {
     date: string;
     description: string;
-    status?: "PENDING" | "APPROVED" | "REJECTED";
+    status?: "PENDING" | "APPROVED" | "REJECTED" | "CANCELLED";
 }
 
 export function ActivityItem({ date, description, status }: ActivityItemProps) {
@@ -15,13 +15,15 @@ export function ActivityItem({ date, description, status }: ActivityItemProps) {
             </div>
             {status && (
                 <Badge variant={
-                    status === 'APPROVED' ? 'default' : // default usually black/primary, might need custom variant
+                    status === 'APPROVED' ? 'default' :
                         status === 'REJECTED' ? 'destructive' :
-                            'outline' // Pending
+                            status === 'CANCELLED' ? 'secondary' :
+                                'outline'
                 } className={
                     status === 'APPROVED' ? 'bg-green-100 text-green-800 hover:bg-green-200 border-green-200 shadow-none' :
                         status === 'REJECTED' ? 'bg-red-100 text-red-800 hover:bg-red-200 border-red-200 shadow-none' :
-                            'bg-yellow-100 text-yellow-800 hover:bg-yellow-200 border-yellow-200 shadow-none'
+                            status === 'CANCELLED' ? 'bg-gray-100 text-gray-800 hover:bg-gray-200 border-gray-200 shadow-none' :
+                                'bg-yellow-100 text-yellow-800 hover:bg-yellow-200 border-yellow-200 shadow-none'
                 }>
                     {status}
                 </Badge>

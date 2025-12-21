@@ -55,9 +55,8 @@ def generate_reconciliation_data(
     """
     start_date, end_date = get_month_date_range(year, month)
 
-    # 1. Fetch All Contractors (Active)
-    # In a real app, you'd filter by is_active=True
-    users = session.exec(select(User).where(User.role == UserRole.CONTRACTOR)).all()
+    # 1. Fetch All Active Users (CONTRACTOR, MANAGER, ADMIN)
+    users = session.exec(select(User).where(User.is_active == True)).all()
 
     # 2. Fetch All APPROVED Leaves for this period
     # Note: We filter by Approved status to ensure financial accuracy
@@ -149,7 +148,7 @@ async def export_reconciliation_csv(
         
         # Header
         writer.writerow([
-            "Contractor Name", 
+            "Name", 
             "Vendor ID", 
             "Potential Working Days", 
             "Chargeable Leave (Days)", 

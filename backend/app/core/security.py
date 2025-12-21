@@ -3,18 +3,23 @@ import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jwt.algorithms import RSAAlgorithm
-import requests
 from app.core.database import get_session
 from app.models import User
 from sqlmodel import Session, select
 
+import ssl
+import certifi
+
+
 # 1. Configuration
 # Get this from Clerk Dashboard -> API Keys -> JWKS URL
-CLERK_JWKS_URL = os.getenv("CLERK_JWKS_URL", "https://api.clerk.com/v1/jwks")
+CLERK_JWKS_URL = os.getenv("CLERK_JWKS_URL", "https://central-snapper-39.clerk.accounts.dev/.well-known/jwks.json")
 CLERK_AUDIENCE = os.getenv("CLERK_AUDIENCE", "") # Optional: If you use audiences
 
 # 2. Cache the Public Keys (So we don't hit Clerk API on every request)
-jwks_client = jwt.PyJWKClient(CLERK_JWKS_URL)
+# FIX: MacOS often lacks root certs in Python. We explicitly use certifi's bundle.
+ssl_context = ssl.create_default_context(cafile=certifi.where())
+jwks_client = jwt.PyJWKClient(CLERK_JWKS_URL, ssl_context=ssl_context)
 
 security_scheme = HTTPBearer()
 
@@ -33,7 +38,6 @@ def verify_clerk_token(credentials: HTTPAuthorizationCredentials = Depends(secur
             audience=CLERK_AUDIENCE if CLERK_AUDIENCE else None,
             options={"verify_exp": True} # Checks expiration automatically
         )
-        
         return payload
 
     except jwt.ExpiredSignatureError:
@@ -63,10 +67,35 @@ def get_current_user(
     user = session.exec(statement).first()
     
     if not user:
-        # Edge Case: Webhook hasn't fired yet, or sync failed.
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, 
-            detail="User not synchronized with internal database."
-        )
+        # Auto-create the user (JIT Provisioning)
+        # We can extract more info from the token if available, usually Clerk tokens have 'email' or custom claims
+        # For now, we'll try to extract email if present, or fallback to a placeholder
         
+        # NOTE: Clerk JWT templates might need to be configured to include email.
+        # Assuming standard claims or simple fallback for now.
+        email = payload.get("email", "") 
+        if not email and "email_addresses" in payload:
+             # Sometimes passed as list in custom claims
+             emails = payload.get("email_addresses", [])
+             if emails:
+                 email = emails[0].get("email_address", "")
+
+        full_name = payload.get("name", "Unknown User")
+        
+        # Create new user
+        user = User(
+            clerk_id=clerk_id,
+            email=email or f"{clerk_id}@placeholder.com", # Fallback if email not in token
+            full_name=full_name,
+            role="CONTRACTOR" # Default role
+        )
+        try:
+            session.add(user)
+            session.commit()
+            session.refresh(user)
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to synchronize user profile"
+            )  
     return user
