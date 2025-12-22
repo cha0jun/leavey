@@ -36,9 +36,9 @@ The fastest way to start the system is using Docker Compose.
     ```
 
 4.  **Access the Application**:
-    - Via IP: `http://<YOUR-IP-ADDRESS>` (No domain needed)
-    - Local: `http://localhost:80`
-    - API Documentation (Swagger): `http://<IP>/docs`
+    - Frontend: `http://localhost:3000`
+    - Backend API: `http://localhost:8000`
+    - API Documentation (Swagger): `http://localhost:8000/docs`
 
 ## Production/VM Setup (GCP)
 

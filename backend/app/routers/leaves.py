@@ -89,7 +89,7 @@ def sync_to_vendor_system(leave: LeaveRequest, user: User) -> str:
 # --- ENDPOINTS ---
 
 # 1. CREATE (LEAVE-001)
-@router.post("", response_model=LeaveRequestRead)
+@router.post("/", response_model=LeaveRequestRead)
 async def create_leave_request(
     leave_data: LeaveRequestCreate,
     current_user: User = Depends(get_current_user),
@@ -132,7 +132,7 @@ async def create_leave_request(
 
 
 # 2. LIST (Dashboard)
-@router.get("", response_model=List[LeaveRequestRead])
+@router.get("/", response_model=List[LeaveRequestRead])
 async def list_leaves(
     offset: int = 0,
     limit: int = Query(default=50, le=100),
