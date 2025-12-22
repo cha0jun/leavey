@@ -1,0 +1,36 @@
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Database
+*.sqlite
+backend/local_db.sqlite
+postgres_data/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Node
+node_modules/
+.next/
+dist/
+build/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+backend/venv/
+backend/.venv/
+.pytest_cache/
+
+# Uploads
+backend/uploads/
+uploads/
+
+# IDEs
+.vscode/
+.idea/
