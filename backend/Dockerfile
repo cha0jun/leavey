@@ -17,6 +17,15 @@ ENV CLERK_JWKS_URL="https://central-snapper-39.clerk.accounts.dev/.well-known/jw
 # Copy application code
 COPY . .
 
+# Create a non-root user
+RUN useradd -m appuser && \
+    chown -R appuser:appuser /app
+
+# Ensure uploads directory exists and is owned by appuser
+RUN mkdir -p /app/uploads && chown -R appuser:appuser /app/uploads
+
+USER appuser
+
 # Make prestart script executable
 RUN chmod +x prestart.sh
 

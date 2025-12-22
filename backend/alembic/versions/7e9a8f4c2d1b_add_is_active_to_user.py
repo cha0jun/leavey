@@ -18,8 +18,19 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.add_column('user', sa.Column('is_active', sa.Boolean(), nullable=False, server_default=sa.text('true')))
+    # Check if column already exists (common in dirty dev environments)
+    bind = op.get_bind()
+    insp = sa.inspect(bind)
+    columns = [c['name'] for c in insp.get_columns('user')]
+    
+    if 'is_active' not in columns:
+        op.add_column('user', sa.Column('is_active', sa.Boolean(), nullable=False, server_default=sa.text('true')))
 
 
 def downgrade() -> None:
-    op.drop_column('user', 'is_active')
+    bind = op.get_bind()
+    insp = sa.inspect(bind)
+    columns = [c['name'] for c in insp.get_columns('user')]
+    
+    if 'is_active' in columns:
+        op.drop_column('user', 'is_active')

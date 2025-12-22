@@ -1,20 +1,16 @@
-import os
+from app.core.config import settings
 import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from jwt.algorithms import RSAAlgorithm
 from app.core.database import get_session
 from app.models import User
 from sqlmodel import Session, select
-
 import ssl
 import certifi
 
-
 # 1. Configuration
-# Get this from Clerk Dashboard -> API Keys -> JWKS URL
-CLERK_JWKS_URL = os.getenv("CLERK_JWKS_URL", "https://central-snapper-39.clerk.accounts.dev/.well-known/jwks.json")
-CLERK_AUDIENCE = os.getenv("CLERK_AUDIENCE", "") # Optional: If you use audiences
+CLERK_JWKS_URL = settings.CLERK_JWKS_URL
+CLERK_AUDIENCE = settings.CLERK_AUDIENCE
 
 # 2. Cache the Public Keys (So we don't hit Clerk API on every request)
 # FIX: MacOS often lacks root certs in Python. We explicitly use certifi's bundle.

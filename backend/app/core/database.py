@@ -1,14 +1,13 @@
-# app/core/database.py
 from sqlmodel import SQLModel, Session, create_engine
-import os
+from app.core.config import settings
 
-# Use SQLite for local "vibe" development, Postgres for prod
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./local_db.sqlite")
+# Use settings for Database URL
+DATABASE_URL = settings.DATABASE_URL
 
 # check_same_thread=False is needed only for SQLite
 connect_args = {"check_same_thread": False} if "sqlite" in DATABASE_URL else {}
 
-engine = create_engine(DATABASE_URL, echo=True, connect_args=connect_args)
+engine = create_engine(DATABASE_URL, echo=not settings.is_production, connect_args=connect_args)
 
 def get_session():
     """Dependency to provide a DB session per request"""

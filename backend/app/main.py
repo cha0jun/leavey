@@ -1,61 +1,47 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
-# Import the routers from the modules we created
-# Import the routers from the modules we created
 from app.routers import users, leaves, finance, audit, webhooks
-
-from dotenv import load_dotenv
-import os
-
-# Load .env file (if present)
-load_dotenv()
-
+from app.core.config import settings
 from contextlib import asynccontextmanager
-from contextlib import asynccontextmanager
-from app.core.database import create_db_and_tables
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    create_db_and_tables()
+    # Schema creation should happen via Alembic in production
+    if not settings.is_production:
+        from app.core.database import create_db_and_tables
+        create_db_and_tables()
     yield
 
 app = FastAPI(
-    title="Government Leave Portal API",
-    version="1.0.0",
+    title=settings.PROJECT_NAME,
+    version=settings.VERSION,
     description="Vibe Stack: FastAPI + SQLModel + Clerk + Orval",
     lifespan=lifespan,
-    docs_url="/docs", # Swagger UI
-    redoc_url="/redoc"
+    docs_url="/docs" if settings.ENABLE_DOCS else None,
+    redoc_url="/redoc" if settings.ENABLE_DOCS else None
 )
 
 # --- 1. MIDDLEWARE: CORS ---
-# Essential for Vibe Coding. Without this, your Next.js app (localhost:3000) 
-# will be blocked from calling your FastAPI app (localhost:8000).
-origins = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-]
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=settings.CORS_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"], # Allow all methods (POST, GET, PATCH, etc.)
-    allow_headers=["*"], # Allow all headers (Authorization, etc.)
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # --- 2. REGISTER ROUTERS ---
-# The 'tags' argument is super important! 
-# Orval uses these tags to name your React Hooks folders/files.
-
 app.include_router(users.router, prefix="/users", tags=["Users"])
 app.include_router(leaves.router, prefix="/leaves", tags=["Leaves"])
 app.include_router(finance.router, prefix="/finance", tags=["Finance"])
 app.include_router(audit.router, prefix="/audit", tags=["Audit"])
+app.include_router(webhooks.router, prefix="/webhooks", tags=["Webhooks"])
 
 # --- 3. HEALTH CHECK ---
-# Always have a simple root endpoint to verify the server is breathing.
 @app.get("/health", tags=["System"])
 def health_check():
-    return {"status": "ok", "environment": "dev"}
+    return {
+        "status": "ok", 
+        "environment": settings.ENVIRONMENT,
+        "version": settings.VERSION
+    }

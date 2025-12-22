@@ -26,12 +26,8 @@ services:
       - "8000:8000"
     volumes:
       - uploads_data:/app/uploads
-    environment:
-      DATABASE_URL: postgresql://user:password@db:5432/app_db
-      REDIS_URL: redis://redis:6379/0
-      UPLOAD_DIR: /app/uploads
-      # Allow frontend and other origins
-      BACKEND_CORS_ORIGINS: '["http://localhost:3000", "http://localhost:8000"]'
+    env_file:
+      - .env
     depends_on:
       - db
       - redis
@@ -39,14 +35,15 @@ services:
   frontend:
     build:
       context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+        NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+        NEXT_PUBLIC_CLERK_SIGN_IN_FORCE_REDIRECT_URL: ${NEXT_PUBLIC_CLERK_SIGN_IN_FORCE_REDIRECT_URL}
+        NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL: ${NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL}
     ports:
       - "3000:3000"
-    environment:
-      # Use internal URL for SSG/SSR data fetching if needed, though most fetch is client-side
-      # For browser-side fetch, it uses public URL which is localhost:8000
-      NEXT_PUBLIC_API_URL: http://localhost:8000
     env_file:
-      - ./frontend/.env.local
+      - .env
     depends_on:
       - backend
 
