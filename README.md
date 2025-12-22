@@ -4,7 +4,8 @@ Welcome to the documentation for Leavey, a comprehensive leave management system
 
 ## Documentation Index
 
-- [**Architecture & Design**](docs/architecture.md): System overview, data flow, and core logic.
+- [**Architecture & Design**](docs/architecture.md): System overview and technical design.
+- [**Reconciliation Logic**](docs/reconciliation.md): Deep dive into the financial engine and snapshotting.
 - [**Setup & Installation**](docs/setup.md): How to get Leavey running locally and in production.
 - [**User Guides**](docs/user_guides.md): Role-based manuals for all users.
 - [**Test Cases**](docs/test_cases.md): Quality assurance scenarios.

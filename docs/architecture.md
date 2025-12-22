@@ -65,6 +65,9 @@ graph LR
 
 The reconciliation engine is the core financial component of Leavey. It calculates the billable days for contractors based on their approved leave and the "chargeable" status of those leaves.
 
+> [!TIP]
+> For a detailed breakdown of the math, snapshotting mechanism, and edge cases, see the **[Reconciliation Deep Dive](reconciliation.md)**.
+
 ### The Formula
 
 The system calculates billable days for a specific period (usually a month) as follows:

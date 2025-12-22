@@ -36,9 +36,9 @@ The fastest way to start the system is using Docker Compose.
     ```
 
 4.  **Access the Application**:
-    - Frontend: `http://localhost:3000`
-    - Backend API: `http://localhost:8000`
-    - API Documentation (Swagger): `http://localhost:8000/docs`
+    - Via IP: `http://<YOUR-IP-ADDRESS>` (No domain needed)
+    - Local: `http://localhost:80`
+    - API Documentation (Swagger): `http://<IP>/docs`
 
 ## Production/VM Setup (GCP)
 
@@ -60,5 +60,27 @@ Alembic is used for database migrations.
 
 To run migrations manually:
 ```bash
-docker-compose exec backend alembic upgrade head
+Docker-compose exec backend alembic upgrade head
 ```
+
+## SSL Certificate Generation (Production)
+
+Once you have pointed your domain (e.g., `yourdomain.com`) to your VM's IP address:
+
+1.  **Stop Nginx** (if running):
+    ```bash
+    docker-compose stop nginx
+    ```
+
+2.  **Generate Certificates** (Run this once):
+    ```bash
+    docker-compose run --rm certbot certonly --webroot --webroot-path /var/www/certbot/ -d yourdomain.com --email your-email@example.com --agree-tos --no-eff-email
+    ```
+
+3.  **Start Services**:
+    ```bash
+    docker-compose up -d
+    ```
+
+4.  **Automatic Renewal**:
+    The system is configured to check for certificate renewals every 12 hours automatically via the `certbot` container.
