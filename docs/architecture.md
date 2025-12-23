@@ -8,14 +8,18 @@ Leavey follows a standard 3-tier architecture with a decoupled frontend and back
 
 ```mermaid
 graph TD
-    Client[Web Browser / Next.js]
+    Client["Browser (HTTPS)"]
+    Nginx["Nginx (SSL Termination)"]
     Auth[Clerk Authentication]
+    Frontend[Next.js Frontend]
     API[FastAPI Backend]
     DB[(PostgreSQL)]
     Redis[(Redis Cache)]
     Storage[Persistent Volume / Uploads]
 
-    Client -- Auth Token --> API
+    Client -- HTTPS --> Nginx
+    Nginx -- Proxy --> Frontend
+    Nginx -- Proxy --> API
     Client -- Auth --> Auth
     API -- SQL --> DB
     API -- Caching --> Redis
@@ -24,11 +28,12 @@ graph TD
 
 ### Components
 
-- **Frontend**: A Next.js application providing a responsive user interface. It uses Clerk for secure authentication and Orval for generated API clients.
-- **Backend**: A FastAPI server that handles business logic, database interactions, and file uploads.
-- **Database**: PostgreSQL serves as the primary data store, managed via SQLModel.
-- **Authentication**: Clerk manages user identities and provides JWT tokens for API authorization.
-- **File Storage**: Local filesystem volumes are used to store uploaded documents associated with leave requests.
+- **Reverse Proxy**: Nginx handles SSL termination, redirects HTTP to HTTPS, and routes traffic to the frontend and backend.
+- **Frontend**: A Next.js application providing a responsive user interface.
+- **Backend**: A FastAPI server handling business logic and API requests.
+- **Database**: PostgreSQL serves as the primary data store.
+- **Authentication**: Clerk manages identities; Nginx forwards headers to enable backend validation.
+- **File Storage**: Local volumes for uploads.
 
 ## Data Flow Diagrams
 
@@ -84,3 +89,18 @@ $$ \text{Billable Days} = \text{Total Working Days} - \text{Non-Chargeable Leave
 > To ensure historical accuracy, Leavey uses **Financial Snapshotting** (Story FIN-003). 
 
 When a leave request is created, the system snapshots the `is_chargeable` status of the category into `cached_chargeable_status`. If a manager later changes a category from "Chargeable" to "Non-Chargeable", older requests remain unaffected, preserving the integrity of previous financial reports.
+
+## SSL & Reverse Proxy
+
+The application uses Nginx for SSL termination. For local and development VM environments, self-signed certificates are used.
+
+### Certificate Generation
+To generate certificates for a specific host (e.g., a VM IP):
+
+```bash
+mkdir -p nginx/certs
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+  -keyout nginx/certs/cert.key \
+  -out nginx/certs/cert.crt \
+  -subj "/CN=<VM_IP_OR_HOST>"
+```
