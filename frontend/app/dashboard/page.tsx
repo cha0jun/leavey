@@ -74,7 +74,7 @@ export default function Dashboard() {
                                 <ActivityItem
                                     key={leave.id}
                                     date={`${formatDate(leave.start_date)} - ${formatDate(leave.end_date)}`}
-                                    description={isStaff ? `${leave.user?.full_name}: Leave Request #${leave.id}` : `Leave Request #${leave.id} (${leave.total_days} days)`}
+                                    description={isStaff ? `${leave.user?.full_name}: Leave Request ` : `Leave Request (${leave.total_days} days)`}
                                     status={leave.status}
                                 />
                             ))
