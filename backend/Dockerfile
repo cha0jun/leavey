@@ -30,4 +30,4 @@ USER appuser
 RUN chmod +x prestart.sh
 
 # Run the application
-CMD ["/bin/bash", "-c", "./prestart.sh && uvicorn app.main:app --host 0.0.0.0 --port 8000"]
+CMD ["/bin/bash", "-c", "./prestart.sh && uvicorn app.main:app --host 0.0.0.0 --port 8000 --proxy-headers --forwarded-allow-ips '*'"]
